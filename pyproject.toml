@@ -23,7 +23,7 @@ dependencies = [
     "scikit-learn==1.8.0",
     "torch",
     "mmer==1.4.0",
-    "sgsim==1.5.0",
+    "sgsim==1.5.1",
     "matplotlib"
 ]
 
