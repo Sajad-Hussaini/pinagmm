@@ -4,13 +4,13 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pinagmm"
-version = "0.1.0"
+version = "0.1.1"
 authors = [{name = "Sajad Hussaini", email = "hussaini.smsajad@gmail.com"}]
 description = "A Physics-Informed Neural Additive Ground Motion Model for Hazard-Compatible Three-Component Stochastic Simulation."
 readme = "README.md"
 license = "MIT"
-requires-python = ">=3.10"
-keywords = ["ground motion models", "stochastic simulation", "conditional simulation", "neural networks", "seismology", "mixed-effects"]
+requires-python = ">=3.12"
+keywords = ["ground motion models", "stochastic ground motion simulation", "conditional simulation", "neural networks", "earthquake simulation", "mixed-effects model"]
 classifiers = [
     "Programming Language :: Python :: 3",
     "Operating System :: OS Independent",
@@ -23,7 +23,7 @@ dependencies = [
     "scikit-learn==1.8.0",
     "torch",
     "mmer==1.4.0",
-    "sgsim==1.4.0",
+    "sgsim==1.5.0",
     "matplotlib"
 ]
 

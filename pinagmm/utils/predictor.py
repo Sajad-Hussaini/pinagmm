@@ -181,60 +181,57 @@ class PINAGMM:
         params_out = {"m": {}, "i": {}, "v": {}}
         ims_out = {"m": [], "i": [], "v": []}
 
-        # Base structure template for StochasticModel.load_from
+        # Base structure template for StochasticModel.from_dict
         for comp in ["m", "i", "v"]:
             params_out[comp] = {
-                "modulating": {
-                    "type": "BetaCentroidSpread",
-                    "time_shift": 0.0,
-                    "params": {},
-                },
-                "upper_frequency": {"type": "Constant", "params": {}},
-                "lower_frequency": {"type": "Constant", "params": {}},
-                "upper_damping": {"type": "Constant", "params": {"value": 0.707}},
-                "lower_damping": {"type": "Constant", "params": {"value": 1.0}},
+                "q_type": "BetaCentroidSpread",
+                "time_shift": 0.0,
+                "wu_type": "Constant",
+                "wl_type": "Constant",
+                "zu_type": "Constant",
+                "zu_value": 0.707,
+                "zl_type": "Constant",
+                "zl_value": 1.0,
             }
+
+        known_params = {
+            "q_centroid",
+            "q_spread",
+            "q_energy",
+            "q_duration",
+            "wu_value",
+            "wl_value",
+        }
 
         # Map yvars names to the corresponding dict structure and IM arrays
         for val, var_name in zip(phys_array, yvars):
             comp = var_name[0].lower()  # 'm', 'i', or 'v'
-            name_rest = var_name[2:]  # Extract exactly after 'M_'
+            name_rest = var_name[2:]  # Extract exactly after 'M_' (e.g., 'q_centroid')
 
-            if name_rest == "q_centroid":
-                params_out[comp]["modulating"]["params"]["centroid"] = val
-            elif name_rest == "q_spread":
-                params_out[comp]["modulating"]["params"]["spread"] = val
-            elif name_rest == "q_energy":
-                params_out[comp]["modulating"]["params"]["energy"] = val
-            elif name_rest == "q_duration":
-                params_out[comp]["modulating"]["params"]["duration"] = val
-            elif name_rest == "wu_value":
-                params_out[comp]["upper_frequency"]["params"]["value"] = val
-            elif name_rest == "wl_value":
-                params_out[comp]["lower_frequency"]["params"]["value"] = val
+            if name_rest in known_params:
+                params_out[comp][name_rest] = val
             else:
                 # Anything else (PGV, Sa_*) goes to Intensity Measures
                 ims_out[comp].append(val)
 
         # Convert centroid and spread to ratio values, and add dynamic npts calculation
         for comp in ["m", "i", "v"]:
-            duration = params_out[comp]["modulating"]["params"]["duration"]
+            duration = params_out[comp]["q_duration"]
 
-            c_ratio = params_out[comp]["modulating"]["params"]["centroid"] / duration
-            s_ratio = params_out[comp]["modulating"]["params"]["spread"] / duration
+            c_ratio = params_out[comp]["q_centroid"] / duration
+            s_ratio = params_out[comp]["q_spread"] / duration
 
             # Post-regression physical regularization:
             # The ML model generated unbounded continuous parameters. We must strictly clip the
             # resulting ratios so the Beta-distribution does not become mathematically
             # undefined or U-shaped (convex instead of concave).
-            params_out[comp]["modulating"]["params"]["centroid"] = np.clip(
-                c_ratio, 0.05, 0.9
-            )
-            params_out[comp]["modulating"]["params"]["spread"] = np.clip(
-                s_ratio, 0.01, 0.45
-            )
+            # Centroid ratio ideally bounded around [0.05, 0.95]
+            # Spread ratio bounded around [0.01, 0.45]
+            params_out[comp]["q_centroid"] = np.clip(c_ratio, 0.05, 0.9)
+            params_out[comp]["q_spread"] = np.clip(s_ratio, 0.01, 0.45)
 
             params_out[comp]["npts"] = int(1.2 * np.ceil(duration / dt))
+            params_out[comp]["dt"] = float(dt)
 
         # Convert IM lists to numpy arrays
         for comp in ["m", "i", "v"]:
@@ -314,9 +311,9 @@ class PINAGMM:
                 sample_phys, dt=dt
             )
 
-            model_m = StochasticModel.load_from(m_params, npts=m_params["npts"], dt=dt)
-            model_i = StochasticModel.load_from(i_params, npts=i_params["npts"], dt=dt)
-            model_v = StochasticModel.load_from(v_params, npts=v_params["npts"], dt=dt)
+            model_m = StochasticModel.from_dict(m_params)
+            model_i = StochasticModel.from_dict(i_params)
+            model_v = StochasticModel.from_dict(v_params)
 
             ts_m = model_m.simulate(n=n_simulations)
             ts_i = model_i.simulate(n=n_simulations)
@@ -335,15 +332,9 @@ class PINAGMM:
                     sample_phys, dt=dt
                 )
 
-                model_m = StochasticModel.load_from(
-                    m_params, npts=m_params["npts"], dt=dt
-                )
-                model_i = StochasticModel.load_from(
-                    i_params, npts=i_params["npts"], dt=dt
-                )
-                model_v = StochasticModel.load_from(
-                    v_params, npts=v_params["npts"], dt=dt
-                )
+                model_m = StochasticModel.from_dict(m_params)
+                model_i = StochasticModel.from_dict(i_params)
+                model_v = StochasticModel.from_dict(v_params)
 
                 ts_m_list.append(model_m.simulate(n=n_simulations))
                 ts_i_list.append(model_i.simulate(n=n_simulations))
