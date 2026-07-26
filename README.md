@@ -10,7 +10,9 @@ Developed for performance-based earthquake engineering, this framework uses a Ph
 
 ## Table of Contents
 - [Installation](#installation)
-- [Quick Start](#quick-start)
+- [Overview: Predict vs. Simulate](#overview-predict-vs-simulate)
+- [Graphical User Interface (GUI)](#graphical-user-interface-gui)
+- [Python API (For Power Users)](#python-api-for-power-users)
   - [1. Median Predictions](#1-median-predictions)
   - [2. Stochastic Simulation (Unconditional & Conditional)](#2-stochastic-simulation)
 - [Contact & Support](#contact--support)
@@ -33,9 +35,32 @@ pip install .
 ```
 
 
-## Quick Start  
+## Overview: Predict vs. Simulate
 
-### 1. Median Predictions  
+PINAGMM separates the statistical machine-learning predictions from the end-to-end stochastic ground motion simulation:
+
+- **`predict()` (The Machine Learning layer):** Purely runs the neural network to predict the 74 output variables (Intensity Measures and stochastic simulation parameters) for a given earthquake scenario. No waveforms are generated here.
+- **`simulate()` (The End-to-End Generative layer):** A comprehensive wrapper that takes the ML predictions, mathematically applies covariance sampling and conditional target matching (if requested), and automatically feeds the parameters into the stochastic engine (`sgsim`) to generate actual 3-component ground motions.
+
+
+## Graphical User Interface (GUI)
+
+For users who prefer a visual, no-code environment, PINAGMM includes a modern, interactive web-based GUI. 
+
+Once installed, ensure your virtual environment is active and run the following command in your terminal:
+```bash
+pinagmm
+```
+This will automatically launch the **Nord-themed interactive dashboard** (usually at `http://localhost:8080`) in your web browser. The GUI allows you to:
+- Seamlessly input scenario parameters (Mw, Ztor, Rrup, Vs30, Fm).
+- Toggle conditional hazard targets (e.g., forcing Sa at 1.0s to equal 0.9g).
+- Instantly visualize predicted median response spectra.
+- Plot and explore 3-component time-series realizations and their Fourier Amplitude Spectra using interactive Plotly charts.
+- Export all generated data and spectra directly to neatly formatted CSV files with a single click.
+
+## Python API (For Power Users)
+
+### 1. Median Predictions (`predict`)
 
 The `PINAGMM` class generates the median physical scaling for both Intensity Measures (PGA, PGV, Sa) and the underlying parameters governing the stochastic simulation (Energy, Duration, Frequencies).
 
@@ -51,11 +76,11 @@ predictions = model.predict(Mw=6.5, Ztor=1.0, Rrup=25.0, Vs30=560.0, Fm="0")
 print(predictions[["PGA", "Sa(T=1)", "PGV"]])
 ```
 
-> 💡 **Tip:** We highly recommend checking out the `example/example.py` file in this repository. It is a fully functional script that demonstrates how to generate predictions, save them to CSV files, and use `matplotlib` to plot and save Attenuation Curves!
+> 💡 **Tip:** We highly recommend checking out the `example/run_me.py` file in this repository. It is a fully functional script that demonstrates how to generate predictions, simulate time-series, save them to CSV files, and use `matplotlib` to plot and save the results!
 
 ### 2. Stochastic Simulation
 
-The true power of this framework lies in the generative engine, which leverages the learned inter-parameter covariance matrix to generate realistic 3-component acceleration time-series seamlessly.
+The true power of this framework lies in the generative engine, which leverages the learned inter-parameter covariance matrix to generate realistic 3-component ground motion seamlessly.
 
 The model provides two completely independent layers of statistical generation natively through the `simulate()` method:
 1. `n_samples`: The number of macroscopic parameter sets to sample from the underlying neural GMM's covariance matrix.
@@ -98,7 +123,7 @@ ts_m_list, ts_i_list, ts_v_list = gmm.simulate(
 Mathematically condition the generative model to match a specific hazard target (e.g., forcing Spectral Acceleration at 1.0s to a specific physical value like 0.9g). The framework automatically adjusts all other correlated IMs and physical simulation parameters across all three principal axes to physically justify the target.  
 
 ```python
-# Condition the target IM to 0.9 g
+# Condition the target IM (Major SA at 1s) to 0.9 g
 target_conditions = {"M_Sa_1": 0.9}
 
 ts_m_cond, ts_i_cond, ts_v_cond = gmm.simulate(

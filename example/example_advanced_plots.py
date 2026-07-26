@@ -1,3 +1,19 @@
+"""
+PINAGMM — Advanced Plots Example
+================================
+Run this script from the repository root:
+
+    python example/example_advanced_plots.py
+
+It demonstrates advanced plotting and analysis using the PINAGMM model:
+  1. Attenuation Curve plotting (PGA vs Distance)
+  2. Multi-metric Time Series plotting (Acceleration, Velocity, Displacement)
+  3. Conditional Hazard Targeting (Conditional Mean Spectra)
+
+All output files are saved to Desktop/PINAGMM Results/ to keep your workspace clean.
+"""
+
+from pathlib import Path
 import numpy as np
 import matplotlib.pyplot as plt
 from pinagmm import PINAGMM
@@ -7,9 +23,52 @@ def main():
     print("Loading PINAGMM...")
     gmm = PINAGMM()
 
-    print("\n--- Generating Stochastic Ground Motions ---")
+    OUT_DIR = Path.home() / "Desktop" / "PINAGMM Results"
+    OUT_DIR.mkdir(parents=True, exist_ok=True)
+    print(f"\nAll outputs will be saved to: {OUT_DIR}")
+
+    # =========================================================================
+    # 1. Attenuation Curve Plotting (Vectorized Prediction)
+    # =========================================================================
+    print("\n--- 1. Generating Attenuation Curve ---")
+    distances = np.linspace(1.0, 100.0, 50)
+
+    attenuation_df = gmm.predict(
+        Mw=7.0, Ztor=3.0, Rrup=distances, Vs30=800.0, Fm="0", n_sample=10
+    )
+
+    fig, ax = plt.subplots(figsize=(8, 6))
+    ax.plot(
+        attenuation_df["ClstD (km)"],
+        attenuation_df["M_Sa_0"],
+        marker=".",
+        linestyle="none",
+        color="b",
+        label="Mw=7.0, Normal",
+    )
+    ax.set_yscale("log")
+    ax.set_xlabel("Rupture Distance ($R_{rup}$) [km]")
+    ax.set_ylabel("Peak Ground Acceleration (PGA) [g]")
+    ax.set_title("PINAGMM Attenuation Curve")
+    ax.grid(True, which="both", ls="--", alpha=0.5)
+    ax.legend()
+    fig.tight_layout()
+
+    out_path = OUT_DIR / "attenuation_curve.png"
+    fig.savefig(out_path, dpi=200)
+    print(f"  [OK] Saved -> {out_path}")
+    plt.close(fig)
+
+    attenuation_df.to_csv(OUT_DIR / "attenuation_results.csv", index=False)
+    print(f"  [OK] Saved -> {OUT_DIR / 'attenuation_results.csv'}")
+
+    # =========================================================================
+    # 2. Multi-metric Time Series (Acceleration, Velocity, Displacement)
+    # =========================================================================
+    print("\n--- 2. Visualizing 3-Component Time Series ---")
+
     # Simulate ground motions using the median parameter prediction (n_samples=0)
-    # We generate 5 realizations (n_simulations=5) to see the phase aleatory variability
+    # Generate 5 stochastic realizations (n_simulations=5) to see aleatory variability
     ts_m_med, ts_i_med, ts_v_med = gmm.simulate(
         Mw=6.5,
         Ztor=1.0,
@@ -17,17 +76,11 @@ def main():
         Vs30=560.0,
         Fm="0",
         dt=0.005,
-        n_samples=0,  # Use strictly the median GMM prediction
-        n_simulations=5,  # Generate 5 stochastic realizations
+        n_samples=0,
+        n_simulations=5,
     )
 
-    # -------------------------------------------------------------------------
-    # Visualization 1: Time Series (Acceleration, Velocity, Displacement)
-    # -------------------------------------------------------------------------
-    print("\n--- Visualizing 3-Component Time Series ---")
-
     # Scale factor to convert acceleration from 'g' to 'cm/s^2'
-    # (The underlying sgsim package natively integrates acceleration to get vel/disp in these scaled units)
     scale = 980.665
 
     fig, axes = plt.subplots(
@@ -35,9 +88,9 @@ def main():
     )
 
     comps = [
-        ("Major", ts_m_med, "tab:blue"),
-        ("Intermediate", ts_i_med, "tab:orange"),
-        ("Vertical", ts_v_med, "tab:green"),
+        ("Major", ts_m_med[0], "tab:blue"),
+        ("Intermediate", ts_i_med[0], "tab:orange"),
+        ("Vertical", ts_v_med[0], "tab:green"),
     ]
 
     metrics = [
@@ -52,23 +105,14 @@ def main():
         for row, (metric, ylabel, scale_factor) in enumerate(metrics):
             ax = axes[row, col]
 
-            # Extract the raw simulation array.
-            # Note: sim.ac, sim.vel, sim.disp are typically shaped (n_simulations, npts)
-            # We transpose it to (npts, n_simulations) for easy plotting against the time vector.
+            # Transpose (n_simulations, npts) to (npts, n_simulations) for plotting
             data = getattr(sim, metric)
             if getattr(data, "ndim", 1) > 1:
                 data = data.T
 
-            # Plot a faint ensemble of all 5 realizations
-            ax.plot(
-                sim.t,
-                data * scale_factor,
-                color=color,
-                alpha=0.3,
-                linewidth=0.5,
-            )
-
-            # Highlight one representative realization in black
+            # Plot ensemble cloud
+            ax.plot(sim.t, data * scale_factor, color=color, alpha=0.3, linewidth=0.5)
+            # Highlight one realization
             ax.plot(sim.t, data[:, 0] * scale_factor, color="k", linewidth=0.8)
 
             if col == 0:
@@ -79,23 +123,22 @@ def main():
             ax.spines["top"].set_visible(False)
             ax.spines["right"].set_visible(False)
             ax.minorticks_on()
-            ax.grid(axis="both", which="minor", linewidth=0.1, alpha=0.2)
+            ax.grid(axis="both", which="minor", linewidth=0.1, alpha=0.5)
             ax.grid(axis="both", which="major", linewidth=0.2, alpha=0.3)
 
-    plt.savefig("simulated_3_component_traces.png", dpi=300, bbox_inches="tight")
-    print("Saved 'simulated_3_component_traces.png'")
+    out_path = OUT_DIR / "simulated_3_component_traces.png"
+    fig.savefig(out_path, dpi=200)
+    print(f"  [OK] Saved -> {out_path}")
+    plt.close(fig)
 
-    # -------------------------------------------------------------------------
-    # Visualization 2: Target Conditioning (Conditional Mean Spectra)
-    # -------------------------------------------------------------------------
-    print("\n--- Visualizing Conditional Hazard Targeting ---")
+    # =========================================================================
+    # 3. Conditional Hazard Targeting
+    # =========================================================================
+    print("\n--- 3. Visualizing Conditional Hazard Targeting ---")
 
-    # Let's say we want a high-hazard scenario where the Major Component's
-    # PGA (M_PGV) or Spectral Acceleration at 1.0s is specifically 0.9g.
+    # High-hazard scenario: forcing Major Component Spectral Acceleration at 1.0s to 0.9g
     target_conditions = {"M_Sa_1": 0.9}
 
-    # Generate conditioned samples. The ML model automatically adjusts all other
-    # intensity measures and physical parameters to physically justify this specific target.
     ts_m_cond, ts_i_cond, ts_v_cond = gmm.simulate(
         Mw=6.5,
         Ztor=1.0,
@@ -108,28 +151,23 @@ def main():
         n_simulations=1,  # 1 stochastic realization per set
     )
 
-    # Calculate Response Spectra for the 5 conditioned simulations
     periods_val = np.logspace(-2, 1, 50)
-
-    # (ts_m_cond is a list of GroundMotion objects because n_samples > 1)
     sa_cond_m = np.zeros((5, len(periods_val)))
+
     for i, sim_realization in enumerate(ts_m_cond):
         _, _, sa = sim_realization.response_spectra(periods_val)
         sa_cond_m[i] = sa.flatten()
 
-    plt.figure(figsize=(7, 5))
+    fig, ax = plt.subplots(figsize=(7, 5))
 
-    # Plot the full ensemble cloud
-    plt.loglog(periods_val, sa_cond_m.T, color="tab:blue", lw=0.2, alpha=0.2)
+    ax.loglog(periods_val, sa_cond_m.T, color="tab:blue", lw=0.5, alpha=0.5)
 
-    # Plot the median of the conditioned cloud
     sim_p50 = np.percentile(sa_cond_m, 50, axis=0)
-    plt.loglog(
+    ax.loglog(
         periods_val, sim_p50, color="k", linewidth=1.5, label="Median Conditional Sa"
     )
 
-    # Plot the specific condition we demanded
-    plt.plot(
+    ax.plot(
         [1.0],
         [0.9],
         marker="*",
@@ -138,13 +176,21 @@ def main():
         label="User Target (0.9g at 1.0s)",
     )
 
-    plt.xlabel("Period (s)")
-    plt.ylabel("Spectral Acceleration (g)")
-    plt.title("Conditional Mean Spectra (Targeting 0.9g at 1.0s) (No Exact Match)")
-    plt.grid(True, which="both", ls="--", alpha=0.5)
-    plt.legend()
-    plt.savefig("conditional_spectra_target.png", dpi=300, bbox_inches="tight")
-    print("Saved 'conditional_spectra_target.png'")
+    ax.set_xlabel("Period (s)")
+    ax.set_ylabel("Spectral Acceleration (g)")
+    ax.set_title("Conditional Mean Spectra (Targeting 0.9g at 1.0s)")
+    ax.grid(True, which="both", ls="--", alpha=0.5)
+    ax.legend()
+    fig.tight_layout()
+
+    out_path = OUT_DIR / "conditional_spectra_target.png"
+    fig.savefig(out_path, dpi=200)
+    print(f"  [OK] Saved -> {out_path}")
+    plt.close(fig)
+
+    print("\n" + "=" * 60)
+    print("All done! Results are in the Desktop/PINAGMM Results/ directory.")
+    print("=" * 60)
 
 
 if __name__ == "__main__":

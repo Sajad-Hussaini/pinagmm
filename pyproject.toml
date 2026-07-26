@@ -4,13 +4,20 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pinagmm"
-version = "0.1.1"
+version = "0.3.0"
 authors = [{name = "Sajad Hussaini", email = "hussaini.smsajad@gmail.com"}]
 description = "A Physics-Informed Neural Additive Ground Motion Model for Hazard-Compatible Three-Component Stochastic Simulation."
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.12"
-keywords = ["ground motion models", "stochastic ground motion simulation", "conditional simulation", "neural networks", "earthquake simulation", "mixed-effects model"]
+keywords = [
+    "ground motion models",
+    "stochastic ground motion simulation",
+    "conditional simulation",
+    "neural networks",
+    "earthquake simulation",
+    "mixed-effects model",
+]
 classifiers = [
     "Programming Language :: Python :: 3",
     "Operating System :: OS Independent",
@@ -22,18 +29,29 @@ dependencies = [
     "pandas",
     "scikit-learn==1.8.0",
     "torch",
-    "mmer==1.4.0",
+    "mmer==1.4.2",
     "sgsim==1.5.1",
-    "matplotlib"
+    "matplotlib",
+    "nicegui>=1.4",
+    "plotly",
 ]
 
 [project.urls]
-Homepage = "https://github.com/Sajad-Hussaini/PINAGMM"
+Homepage   = "https://github.com/Sajad-Hussaini/PINAGMM"
 Repository = "https://github.com/Sajad-Hussaini/PINAGMM"
-Issues = "https://github.com/Sajad-Hussaini/PINAGMM/issues"
+Issues     = "https://github.com/Sajad-Hussaini/PINAGMM/issues"
 
 [tool.setuptools]
-packages = ["pinagmm", "pinagmm.utils", "pinagmm.model"]
+packages = [
+    "pinagmm",
+    "pinagmm.core",
+    "pinagmm.gui",
+    "pinagmm.model",
+]
 
 [tool.setuptools.package-data]
 "pinagmm.model" = ["*.joblib"]
+"pinagmm.gui" = ["assets/*"]
+
+[project.scripts]
+pinagmm = "pinagmm.gui.app:run_app"
