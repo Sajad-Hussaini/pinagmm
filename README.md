@@ -1,3 +1,7 @@
+<div align="center">
+  <img src="pinagmm/gui/assets/logo.png" width="150" alt="PINAGMM Logo">
+</div>
+
 # PINAGMM: Physics-Informed Neural Additive Ground Motion Model
 
 [![Python](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)

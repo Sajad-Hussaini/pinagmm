@@ -22,7 +22,7 @@ from plotly.subplots import make_subplots
 from nicegui import ui, run
 
 from pinagmm import PINAGMM, save_timeseries, save_spectra
-from pinagmm.core.variables import periods as SA_PERIODS, yvars
+from pinagmm.core.variables import periods as SA_PERIODS, yvars, ylabels
 
 # ─────────────────────────────────────────────────────────────────────────────
 #  Constants & theming
@@ -70,8 +70,24 @@ _PL = dict(
     ),
 )
 
-# IM columns available for conditional targeting
-_COND_IMS = [v for v in yvars if any(s in v for s in ("PGV", "Sa"))]
+# Create a dictionary mapping raw variables to readable English labels for the UI dropdown
+def _make_nice_label(v: str) -> str:
+    c_map = {"M": "Major", "I": "Interm.", "V": "Vertical"}
+    if "PGV" in v:
+        comp = v.split("_")[0]
+        return f"PGV [{c_map.get(comp, comp)}]"
+    elif "Sa" in v:
+        parts = v.split("_")
+        comp = parts[0]
+        per = parts[2]
+        return f"SA (T={per}s) [{c_map.get(comp, comp)}]"
+    return v
+
+_COND_OPTIONS = {
+    v: _make_nice_label(v)
+    for v in yvars
+    if any(s in v for s in ("PGV", "Sa"))
+}
 
 # Fault mechanism dropdown options
 _FM_LABELS = {
@@ -289,16 +305,15 @@ def fig_spectrum_predicted(pred: pd.DataFrame) -> go.Figure:
 
     fig.update_layout(
         **_layout(
-            title=_title("Predicted Median Response Spectrum"),
-            xaxis=dict(**_PL["xaxis"], title="Period (s)", type="log"),
-            yaxis=dict(**_PL["yaxis"], title="Spectral Acceleration (g)", type="log"),
+            xaxis=dict(**_PL["xaxis"], title="Period (s)", type="log", minor=dict(showgrid=True, gridcolor="#3B4252")),
+            yaxis=dict(**_PL["yaxis"], title="Spectral Acceleration (g)", type="log", minor=dict(showgrid=True, gridcolor="#3B4252")),
         )
     )
     return fig
 
 
-def fig_timeseries(ts_m, ts_i, ts_v, max_traces: int = 30) -> go.Figure:
-    """3-component acceleration time series."""
+def fig_timeseries(ts_m, ts_i, ts_v, plot_type: str = "Acceleration", max_traces: int = 30) -> go.Figure:
+    """3-component time series plot (Acceleration, Velocity, or Displacement)."""
     fig = make_subplots(
         rows=3,
         cols=1,
@@ -306,6 +321,13 @@ def fig_timeseries(ts_m, ts_i, ts_v, max_traces: int = 30) -> go.Figure:
         subplot_titles=["<b>Major</b>", "<b>Intermediate</b>", "<b>Vertical</b>"],
         vertical_spacing=0.08,
     )
+
+    unit = "g"
+    if plot_type == "Velocity":
+        unit = "cm/s"
+    elif plot_type == "Displacement":
+        unit = "cm"
+
     for row_idx, (comp, ts) in enumerate(
         [("Major", ts_m), ("Intermediate", ts_i), ("Vertical", ts_v)], start=1
     ):
@@ -315,14 +337,28 @@ def fig_timeseries(ts_m, ts_i, ts_v, max_traces: int = 30) -> go.Figure:
         for gi, gm in enumerate(gm_list):
             ac = np.atleast_2d(gm.ac)
             t = gm.t
-            for si in range(ac.shape[0]):
+            dt = gm.dt
+
+            # Compute based on plot_type
+            if plot_type == "Acceleration":
+                y_data = ac
+            elif plot_type == "Velocity":
+                # Convert g to cm/s^2 (1 g = 980.665 cm/s^2), then integrate
+                vel = np.cumsum(ac * 980.665, axis=1) * dt
+                y_data = vel
+            elif plot_type == "Displacement":
+                vel = np.cumsum(ac * 980.665, axis=1) * dt
+                disp = np.cumsum(vel, axis=1) * dt
+                y_data = disp
+
+            for si in range(y_data.shape[0]):
                 if count >= max_traces:
                     break
                 first = gi == 0 and si == 0
                 fig.add_trace(
                     go.Scatter(
                         x=t,
-                        y=ac[si],
+                        y=y_data[si],
                         mode="lines",
                         name=comp if first else None,
                         showlegend=first,
@@ -337,16 +373,15 @@ def fig_timeseries(ts_m, ts_i, ts_v, max_traces: int = 30) -> go.Figure:
 
     base = _layout(
         height=580,
-        title=_title("Simulated Ground Motion Time Series  (Acceleration)"),
     )
     base.update(
         {
             "xaxis": dict(**_PL["xaxis"], showticklabels=False),
             "xaxis2": dict(**_PL["xaxis"], showticklabels=False),
             "xaxis3": dict(**_PL["xaxis"], title="Time (s)"),
-            "yaxis": dict(**_PL["yaxis"], title="Major (g)"),
-            "yaxis2": dict(**_PL["yaxis"], title="Interm. (g)"),
-            "yaxis3": dict(**_PL["yaxis"], title="Vertical (g)"),
+            "yaxis": dict(**_PL["yaxis"], title=f"{plot_type} ({unit})"),
+            "yaxis2": dict(**_PL["yaxis"], title=f"{plot_type} ({unit})"),
+            "yaxis3": dict(**_PL["yaxis"], title=f"{plot_type} ({unit})"),
         }
     )
     fig.update_layout(**base)
@@ -401,9 +436,8 @@ def fig_simulated_spectra(ts_m, ts_i, ts_v, periods: np.ndarray) -> go.Figure:
 
     fig.update_layout(
         **_layout(
-            title=_title("Simulated Response Spectra (5% damping)"),
-            xaxis=dict(**_PL["xaxis"], title="Period (s)", type="log"),
-            yaxis=dict(**_PL["yaxis"], title="Spectral Acceleration (g)", type="log"),
+            xaxis=dict(**_PL["xaxis"], title="Period (s)", type="log", minor=dict(showgrid=True, gridcolor="#3B4252")),
+            yaxis=dict(**_PL["yaxis"], title="Spectral Acceleration (g)", type="log", minor=dict(showgrid=True, gridcolor="#3B4252")),
         )
     )
     return fig
@@ -418,8 +452,8 @@ def fig_fas(ts_m, ts_i, ts_v) -> go.Figure:
         color = COMP_COLORS[comp]
         gm_list = ts
         for gi, gm in enumerate(gm_list):
-            fas_data = np.atleast_2d(gm.fas)
-            freq = gm.freq
+            fas_data = np.atleast_2d(gm.fas)[:, 1:]
+            freq = gm.freq[1:]
             for si, fas_row in enumerate(fas_data):
                 first = gi == 0 and si == 0
                 fig.add_trace(
@@ -437,9 +471,8 @@ def fig_fas(ts_m, ts_i, ts_v) -> go.Figure:
 
     fig.update_layout(
         **_layout(
-            title=_title("Fourier Amplitude Spectrum"),
-            xaxis=dict(**_PL["xaxis"], title="Frequency (Hz)", type="log"),
-            yaxis=dict(**_PL["yaxis"], title="Fourier Amplitude (g·s)", type="log"),
+            xaxis=dict(**_PL["xaxis"], title="Frequency (Hz)", type="log", minor=dict(showgrid=True, gridcolor="#3B4252")),
+            yaxis=dict(**_PL["yaxis"], title="Fourier Amplitude (g·s)", type="log", minor=dict(showgrid=True, gridcolor="#3B4252")),
         )
     )
     return fig
@@ -458,14 +491,21 @@ def build_page() -> None:
     # ── Header ────────────────────────────────────────────────────────────────
     with ui.header().classes("items-center q-py-xs q-px-lg"):
         ui.image("/assets/logo.png").style("width: 32px; height: 32px;")
-        ui.label("PINAGMM").classes("text-weight-bold q-ml-sm").style(
-            "font-size:1.22rem;letter-spacing:.06em;"
+        ui.label("P I N A G M M").classes("text-weight-bold q-ml-sm").style(
+            "font-size:1.35rem;letter-spacing:.02em;"
         )
         ui.label("Physics-Informed Neural Additive Ground Motion Model").style(
-            "font-size:.78rem;opacity:.7;margin-left:.75rem;"
+            "font-size:.88rem;opacity:.95;margin-left:.75rem;"
         )
         ui.space()
-        status_lbl = ui.label("Ready").classes("status-pill")
+
+        # Spinner removed as status label already indicates progress
+
+        ui.button(icon="clear_all", on_click=lambda: on_clear()).props("flat dense").classes("text-grey-5").tooltip("Clear Results")
+        btn_pred = ui.button("Predict", icon="analytics", on_click=lambda: on_predict()).classes("primary-btn q-px-md").tooltip("Run the neural network model to predict median Intensity Measures")
+        btn_sim = ui.button("Simulate", icon="waves", on_click=lambda: on_simulate()).classes("accent-btn q-px-md").tooltip("Use predicted parameters to generate stochastic time-series simulations")
+
+        status_lbl = ui.label("Ready").classes("status-pill q-ml-md")
 
     # ── Main two-column layout ─────────────────────────────────────────────────
     with (
@@ -483,32 +523,22 @@ def build_page() -> None:
                 "background:rgba(46,52,64,.55);border-right:1px solid var(--border);"
             )
         ):
+
             with ui.card().classes("pcard q-pa-md w-full"):
-                ui.label("Earthquake and Site Scenario").classes("slabel q-mb-sm")
-                i_mw = (
-                    ui.number(
-                        "Moment Magnitude Mw",
-                        value=6.5,
-                        min=4.0,
-                        max=8.5,
-                        step=0.1,
-                        format="%.1f",
+                ui.label("Earthquake and Site Scenario").classes("slabel q-mb-xs")
+                with ui.grid(columns=2).classes("w-full q-gutter-x-sm"):
+                    i_mw = (
+                        ui.number(
+                            "Mw", value=6.5, min=4.0, max=8.5, step=0.1, format="%.1f"
+                        )
+                        .props("dense outlined")
                     )
-                    .props("dense outlined")
-                    .classes("w-full")
-                )
-                i_ztor = (
-                    ui.number(
-                        "Rupture Depth Ztor (km)",
-                        value=3.0,
-                        min=0.0,
-                        max=30.0,
-                        step=0.5,
-                        format="%.1f",
+                    i_ztor = (
+                        ui.number(
+                            "Ztor (km)", value=3.0, min=0.0, max=30.0, step=0.5, format="%.1f"
+                        )
+                        .props("dense outlined")
                     )
-                    .props("dense outlined")
-                    .classes("w-full q-mt-sm")
-                )
                 i_fm = (
                     ui.select(
                         options=list(_FM_LABELS),
@@ -516,68 +546,48 @@ def build_page() -> None:
                         value="0 — Strike Slip",
                     )
                     .props("dense outlined")
-                    .classes("w-full q-mt-sm")
+                    .classes("w-full q-mt-xs")
                 )
-                i_rrup = (
-                    ui.number(
-                        "Rupture Distance Rrup (km)",
-                        value=15.0,
-                        min=1.0,
-                        max=400.0,
-                        step=1.0,
-                        format="%.1f",
+                with ui.grid(columns=2).classes("w-full q-gutter-x-sm q-mt-xs"):
+                    i_rrup = (
+                        ui.number(
+                            "Rrup (km)", value=15.0, min=1.0, max=400.0, step=1.0, format="%.1f"
+                        )
+                        .props("dense outlined")
                     )
-                    .props("dense outlined")
-                    .classes("w-full q-mt-sm")
-                )
-                i_vs30 = (
-                    ui.number(
-                        "VS30 (m/s)",
-                        value=800,
-                        min=100,
-                        max=2000,
-                        step=10,
-                        format="%.0f",
+                    i_vs30 = (
+                        ui.number(
+                            "VS30 (m/s)", value=800, min=100, max=2000, step=10, format="%.0f"
+                        )
+                        .props("dense outlined")
                     )
-                    .props("dense outlined")
-                    .classes("w-full q-mt-sm")
-                )
 
-                ui.separator().classes("q-my-md")
+                ui.separator().classes("q-my-sm")
 
-                ui.label("Model Settings").classes("slabel q-mb-sm")
-                i_nsmpl = (
-                    ui.number(
-                        "GMM Samples (0 = median only)",
-                        value=0,
-                        min=0,
-                        max=1000,
-                        step=1,
+                ui.label("Model Settings").classes("slabel q-mb-xs")
+                with ui.grid(columns=2).classes("w-full q-gutter-x-sm"):
+                    i_nsmpl = (
+                        ui.number(
+                            "GMM Samples", value=0, min=0, max=1000, step=1
+                        )
+                        .props("dense outlined")
+                        .tooltip("0 = median only")
                     )
-                    .props("dense outlined")
-                    .classes("w-full")
-                )
-                i_dt = (
-                    ui.number(
-                        "Time Step dt (s)",
-                        value=0.005,
-                        min=0.001,
-                        max=0.05,
-                        step=0.001,
-                        format="%.3f",
+                    i_dt = (
+                        ui.number(
+                            "dt (s)", value=0.005, min=0.001, max=0.05, step=0.001, format="%.3f"
+                        )
+                        .props("dense outlined")
                     )
-                    .props("dense outlined")
-                    .classes("w-full q-mt-sm")
-                )
                 i_nsim = (
                     ui.number(
                         "Stochastic Realizations", value=1, min=1, max=100, step=1
                     )
                     .props("dense outlined")
-                    .classes("w-full q-mt-sm")
+                    .classes("w-full q-mt-xs")
                 )
 
-                ui.separator().classes("q-my-md")
+                ui.separator().classes("q-my-sm")
 
                 with ui.row().classes("items-center w-full q-mb-xs"):
                     ui.label("Conditional Target").classes("slabel")
@@ -598,7 +608,7 @@ def build_page() -> None:
                                 
                                 cim = (
                                     ui.select(
-                                        options=_COND_IMS,
+                                        options=_COND_OPTIONS,
                                         label="Target IM",
                                         value=im_val,
                                     )
@@ -637,85 +647,66 @@ def build_page() -> None:
                 cond_box.set_visibility(False)
                 cond_toggle.on_value_change(lambda e: cond_box.set_visibility(e.value))
 
-                ui.separator().classes("q-my-md")
-
-                ui.label("Output Settings").classes("slabel q-mb-sm")
-                with ui.row().classes("w-full"):
-                    i_outdir = (
-                        ui.input("Save Directory", value=str(OUT_DIR))
-                        .props("outlined dense")
-                        .classes("flex-grow")
-                    )
-
-                ui.separator().classes("q-my-md")
-
-                with ui.column().classes("w-full q-gutter-xs"):
-                    btn_pred = ui.button(
-                        "Predict IMs", icon="analytics", on_click=lambda: on_predict()
-                    ).classes("w-full primary-btn q-py-xs")
-                    btn_sim = ui.button(
-                        "Simulate", icon="waves", on_click=lambda: on_simulate()
-                    ).classes("w-full accent-btn q-py-xs")
-                    ui.button(
-                        "Clear", icon="clear_all", on_click=lambda: on_clear()
-                    ).props("flat").classes("w-full text-grey-5")
+                # Removed buttons from the bottom of sidebar to save space
 
         # ── RIGHT results panel ───────────────────────────────────────────────
         with ui.column().classes("flex-grow q-pa-sm").style("min-width:0"):
             with ui.card().classes("pcard w-full q-pa-none").style("overflow:hidden"):
-                # Tab bar
-                with (
-                    ui.tabs()
-                    .props("dense active-color=primary indicator-color=primary")
-                    .classes("w-full q-px-sm") as tabs
-                ):
-                    t_ims = ui.tab("Intensity Measures", icon="analytics")
-                    t_ts = ui.tab("Time Series", icon="waves")
-                    t_spectra = ui.tab("Response Spectra", icon="show_chart")
-                    t_fas = ui.tab("Fourier", icon="graphic_eq")
+                # Header row with Tabs and Action Buttons
+                with ui.row().classes("w-full items-center q-pr-sm").style("border-bottom: 1px solid var(--border); background-color: rgba(0,0,0,0.15)"):
+                    with (
+                        ui.tabs()
+                        .props("dense active-color=primary indicator-color=primary")
+                        .classes("q-px-sm") as main_tabs
+                    ):
+                        t_pred = ui.tab("Prediction Results", icon="analytics")
+                        t_sim = ui.tab("Simulation Results", icon="waves")
+                        
+                    tab_desc = ui.label("Neural Network Median IMs").style("font-size:0.82rem; color:var(--text-muted); margin-left: 1rem; opacity: 0.85;")
+                    
+                    def _update_tab_desc(e):
+                        if e.value == "Prediction Results":
+                            tab_desc.set_text("Direct Neural Network Predictions")
+                        else:
+                            tab_desc.set_text("End-to-End Stochastic Realizations")
+                            
+                    main_tabs.on_value_change(_update_tab_desc)
 
-                ui.separator().props("dark").classes("w-full")
+                # Spinner is now in the header
 
-                # Spinner row (shown while computing)
-                with ui.row().classes("items-center q-px-md q-py-sm") as spin_row:
-                    ui.spinner("dots", size="xs", color="primary")
-                    ui.label("Computing …").style(
-                        "font-size:.83rem;color:var(--text-muted);margin-left:.4rem"
-                    )
-                spin_row.set_visibility(False)
-
-                with ui.tab_panels(tabs, value=t_ims).classes("w-full"):
-                    # ── Intensity Measures panel ─────────────────────────────
-                    with ui.tab_panel(t_ims):
+                with ui.tab_panels(main_tabs, value=t_pred).classes("w-full"):
+                    # ── Predictions panel ─────────────────────────────
+                    with ui.tab_panel(t_pred):
                         im_panel = ui.column().classes("w-full q-pa-sm q-gutter-sm")
                         with im_panel:
-                            ui.label("Run a prediction to see results here.").classes(
-                                "result-hint"
-                            )
+                            ui.label("Run a prediction to see Median Intensity Measures here.").classes("result-hint")
 
-                    # ── Time Series panel ────────────────────────────────────
-                    with ui.tab_panel(t_ts):
-                        ts_panel = ui.column().classes("w-full q-pa-sm q-gutter-sm")
-                        with ts_panel:
-                            ui.label(
-                                "Run a simulation to see time series here."
-                            ).classes("result-hint")
+                    # ── Simulations panel ─────────────────────────────
+                    with ui.tab_panel(t_sim):
+                        with (
+                            ui.tabs()
+                            .props("dense active-color=accent indicator-color=accent")
+                            .classes("w-full q-mb-sm") as sim_tabs
+                        ):
+                            t_ts = ui.tab("Time Series")
+                            t_spectra = ui.tab("Response Spectra")
+                            t_fas = ui.tab("Fourier Amplitude")
 
-                    # ── Simulated Spectra panel ──────────────────────────────
-                    with ui.tab_panel(t_spectra):
-                        sa_panel = ui.column().classes("w-full q-pa-sm q-gutter-sm")
-                        with sa_panel:
-                            ui.label(
-                                "Run a simulation to see response spectra here."
-                            ).classes("result-hint")
+                        with ui.tab_panels(sim_tabs, value=t_ts).classes("w-full"):
+                            with ui.tab_panel(t_ts):
+                                ts_panel = ui.column().classes("w-full q-pa-none q-gutter-sm")
+                                with ts_panel:
+                                    ui.label("Run a simulation to see time series here.").classes("result-hint")
 
-                    # ── FAS panel ────────────────────────────────────────────
-                    with ui.tab_panel(t_fas):
-                        fas_panel = ui.column().classes("w-full q-pa-sm q-gutter-sm")
-                        with fas_panel:
-                            ui.label(
-                                "Run a simulation to see Fourier spectra here."
-                            ).classes("result-hint")
+                            with ui.tab_panel(t_spectra):
+                                sa_panel = ui.column().classes("w-full q-pa-none q-gutter-sm")
+                                with sa_panel:
+                                    ui.label("Run a simulation to see response spectra here.").classes("result-hint")
+
+                            with ui.tab_panel(t_fas):
+                                fas_panel = ui.column().classes("w-full q-pa-none q-gutter-sm")
+                                with fas_panel:
+                                    ui.label("Run a simulation to see Fourier spectra here.").classes("result-hint")
 
     # ── Helpers: read inputs ──────────────────────────────────────────────────
     def _scenario() -> dict:
@@ -737,12 +728,12 @@ def build_page() -> None:
         return None
 
     def _out_dir() -> Path:
-        d = Path(str(i_outdir.value or OUT_DIR))
+        d = Path(OUT_DIR)
         d.mkdir(parents=True, exist_ok=True)
         return d
 
     def _busy(state: bool, btn=None) -> None:
-        spin_row.set_visibility(state)
+        # spin_row has been removed
         if btn:
             if state:
                 btn.disable()
@@ -801,9 +792,21 @@ def build_page() -> None:
     def _render_ts() -> None:
         ts_panel.clear()
         with ts_panel:
-            ui.plotly(fig_timeseries(_s.ts_m, _s.ts_i, _s.ts_v)).classes(
-                "w-full"
-            ).style("min-height:540px")
+            with ui.row().classes("items-center w-full justify-center q-mb-md"):
+                plot_type_toggle = ui.radio(
+                    ['Acceleration', 'Velocity', 'Displacement'], 
+                    value='Acceleration'
+                ).props('inline color=primary')
+            
+            plot_container = ui.column().classes('w-full q-pa-none')
+            
+            def _update_plot():
+                plot_container.clear()
+                with plot_container:
+                    ui.plotly(fig_timeseries(_s.ts_m, _s.ts_i, _s.ts_v, plot_type=plot_type_toggle.value)).classes("w-full").style("min-height:540px")
+                    
+            plot_type_toggle.on_value_change(_update_plot)
+            _update_plot()
 
             with ui.row().classes("q-mt-xs q-gutter-xs"):
                 for comp, attr, label in [
@@ -871,7 +874,7 @@ def build_page() -> None:
             )
             _s.prediction = pred
             _render_ims(pred)
-            tabs.set_value(t_ims)
+            main_tabs.set_value(t_pred)
             status_lbl.text = "Prediction done"
             ui.notify("Prediction complete ✓", type="positive", timeout=2500)
         except Exception as exc:
@@ -902,7 +905,8 @@ def build_page() -> None:
             _render_ts()
             _render_spectra()
             _render_fas()
-            tabs.set_value(t_ts)
+            main_tabs.set_value(t_sim)
+            sim_tabs.set_value(t_ts)
             status_lbl.text = "Simulation done"
             ui.notify("Simulation complete ✓", type="positive", timeout=2500)
         except Exception as exc:
@@ -935,7 +939,7 @@ def run_app():
         root=build_page,
         title="PINAGMM",
         dark=True,
-        favicon="🌊",
+        favicon=str(Path(__file__).parent / "assets" / "logo.png"),
         host=host,
         port=port,
         reload=False,
