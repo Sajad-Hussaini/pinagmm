@@ -791,7 +791,8 @@ def build_page() -> None:
                 async def _save_pred():
                     fp = _out_dir() / "prediction.csv"
                     pred.to_csv(fp, index=False)
-                    ui.notify(f"Saved: {fp}", type="positive")
+                    ui.download(fp)
+                    ui.notify("Download started...", type="positive")
 
                 ui.button(
                     "Save prediction csv", icon="download", on_click=_save_pred
@@ -815,7 +816,8 @@ def build_page() -> None:
                         gm_list = getattr(_s, a)
                         fp = _out_dir() / f"ts_{lbl.lower()}.csv"
                         save_timeseries(gm_list, fp, dt=_s.sim_dt)
-                        ui.notify(f"Saved: {fp}", type="positive")
+                        ui.download(fp)
+                        ui.notify(f"Downloading {lbl.lower()} time series...", type="positive")
 
                     ui.button(
                         f"Save {label.lower()}", icon="save", on_click=_save_ts
@@ -840,7 +842,8 @@ def build_page() -> None:
                         gm_list = getattr(_s, a)
                         fp = _out_dir() / f"spectra_{lbl.lower()}.csv"
                         save_spectra(gm_list, fp, T)
-                        ui.notify(f"Saved: {fp}", type="positive")
+                        ui.download(fp)
+                        ui.notify(f"Downloading {lbl.lower()} spectra...", type="positive")
 
                     ui.button(
                         f"Save {label.lower()} spectra", icon="save", on_click=_save_sa
