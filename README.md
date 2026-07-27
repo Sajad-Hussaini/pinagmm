@@ -1,14 +1,15 @@
 <div align="center">
-  <img src="pinagmm/gui/assets/logo.png" width="150" alt="PINAGMM Logo">
+  <img src="https://raw.githubusercontent.com/Sajad-Hussaini/pinagmm/main/pinagmm/gui/assets/logo.png" alt="PINAGMM Logo" width="300"/>
+  <br>
+  <h1>PINAGMM: Physics-Informed Neural Additive Ground Motion Model</h1>
+
+  <p>
+    <a href="https://www.python.org/downloads/"><img src="https://img.shields.io/badge/python-3.8+-blue.svg" alt="Python"></a>
+    <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License"></a>
+    <a href="https://pinagmm.onrender.com"><img src="https://img.shields.io/badge/Live-Web_App-success?style=flat&logo=render" alt="Live Web App"></a>
+    <a href="https://doi.org/10.5281/zenodo.20746843"><img src="https://zenodo.org/badge/DOI/10.5281/zenodo.20746843.svg" alt="DOI"></a>
+  </p>
 </div>
-
-# PINAGMM: Physics-Informed Neural Additive Ground Motion Model
-
-[![Python](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT)
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20746843.svg)](https://doi.org/10.5281/zenodo.20746843)
-<br>
-[![Live Web App](https://img.shields.io/badge/Live-Web_App-success?style=for-the-badge&logo=render)](https://pinagmm.onrender.com)
 
 **PINAGMM** is a unified multivariate generative framework that bridges the prediction of discrete intensity measures (IMs) with the synthesis of hazard-compatible, three-component stochastic ground motion time-series. 
 
@@ -153,7 +154,6 @@ ts_m_cond, ts_i_cond, ts_v_cond = gmm.simulate(
 ```
 
 ## Contact & Support
-
 For any questions, assistance, or suggestions, please feel free to contact:
 
 **S. M. Sajad Hussaini**  
@@ -161,17 +161,16 @@ For any questions, assistance, or suggestions, please feel free to contact:
 
 > Please include "PINAGMM" in the subject line for a quicker response.
 
+> If you find this package useful, contributions to help maintain and improve it, are always appreciated. [![PayPal](https://img.shields.io/badge/PayPal-Donate-blue.svg)](https://www.paypal.com/paypalme/sajadhussaini)
 
 ## References
 
-If you use this model in your research, please cite the underlying research paper:
-
+Please cite the following references for any formal study:  
 
 **[1] Primary Reference**  
 *A Physics-Informed Neural Additive Ground Motion Model for Hazard-Compatible Three-Component Stochastic Simulation*  
 *DOI: to be added later*  
 (Journal of Earthquake Engineering & Structural Dynamics)
-
 
 **[2] PINAGMM Package**  
 *Physics-Informed Neural Additive Ground Motion Model*  
