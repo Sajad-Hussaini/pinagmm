@@ -20,7 +20,7 @@ Developed for performance-based earthquake engineering, this framework uses a Ph
 - [Overview: Predict vs. Simulate](#overview-predict-vs-simulate)
 - [Graphical User Interface (GUI)](#graphical-user-interface-gui)
 - [Python API (For Power Users)](#python-api-for-power-users)
-  - [1. Median Predictions](#1-median-predictions)
+  - [1. Median Predictions](#1-median-predictions-predict)
   - [2. Stochastic Simulation (Unconditional & Conditional)](#2-stochastic-simulation)
 - [Contact & Support](#contact--support)
 - [References](#references)
