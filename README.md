@@ -46,7 +46,7 @@ pip install .
 
 PINAGMM separates the statistical machine-learning predictions from the end-to-end stochastic ground motion simulation:
 
-- **`predict()` (The Machine Learning layer):** Purely runs the neural network to predict the 74 output variables (Intensity Measures and stochastic simulation parameters) for a given earthquake scenario. No waveforms are generated here.
+- **`predict()` (The Machine Learning layer):** Purely runs the neural network to predict the 69 output variables (Intensity Measures and stochastic simulation parameters) for a given earthquake scenario. No waveforms are generated here.
 - **`simulate()` (The End-to-End Generative layer):** A comprehensive wrapper that takes the ML predictions, mathematically applies covariance sampling and conditional target matching (if requested), and automatically feeds the parameters into the stochastic engine (`sgsim`) to generate actual 3-component ground motions.
 
 
