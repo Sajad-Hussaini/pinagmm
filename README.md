@@ -3,6 +3,8 @@
 [![Python](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20746843.svg)](https://doi.org/10.5281/zenodo.20746843)
+<br>
+[![Live Web App](https://img.shields.io/badge/Live-Web_App-success?style=for-the-badge&logo=render)](https://pinagmm.onrender.com)
 
 **PINAGMM** is a unified multivariate generative framework that bridges the prediction of discrete intensity measures (IMs) with the synthesis of hazard-compatible, three-component stochastic ground motion time-series. 
 
@@ -45,18 +47,26 @@ PINAGMM separates the statistical machine-learning predictions from the end-to-e
 
 ## Graphical User Interface (GUI)
 
-For users who prefer a visual, no-code environment, PINAGMM includes a modern, interactive web-based GUI. 
+For users who prefer a visual, no-code environment, we host a live version of the PINAGMM interactive dashboard. You can generate and download synthetic ground motions directly in your browser without installing any code!
 
-Once installed, ensure your virtual environment is active and run the following command in your terminal:
-```bash
-pinagmm
-```
-This will automatically launch the **Nord-themed interactive dashboard** (usually at `http://localhost:8080`) in your web browser. The GUI allows you to:
+🌐 **[Launch the Live Web App](https://pinagmm.onrender.com)**
+
+> ⚠️ **Live Demo Limitations:** The web app above is hosted on a free cloud server with very limited memory. It is intended strictly as a **lightweight demo** to explore the interface and test small predictions (a few simulations). Attempting to run large batches of stochastic simulations online will not work and face reloading server. For practical, full-scale ground motion generation, please install and run the GUI locally!
+
+The GUI allows you to:
 - Seamlessly input scenario parameters (Mw, Ztor, Rrup, Vs30, Fm).
 - Toggle conditional hazard targets (e.g., forcing Sa at 1.0s to equal 0.9g).
 - Instantly visualize predicted median response spectra.
 - Plot and explore 3-component time-series realizations and their Fourier Amplitude Spectra using interactive Plotly charts.
 - Export all generated data and spectra directly to neatly formatted CSV files with a single click.
+
+### Run the GUI Locally
+
+If you prefer to run the GUI securely on your own machine, first follow the [Installation](#installation) instructions. Then, ensure your virtual environment is active and run the following command in your terminal:
+```bash
+pinagmm
+```
+This will automatically launch the dashboard (usually at `http://localhost:8080`) in your local web browser.
 
 ## Python API (For Power Users)
 
