@@ -339,14 +339,16 @@ def fig_timeseries(ts_m, ts_i, ts_v, max_traces: int = 30) -> go.Figure:
         height=580,
         title=_title("Simulated Ground Motion Time Series  (Acceleration)"),
     )
-    base.update({
-        "xaxis": dict(**_PL["xaxis"], showticklabels=False),
-        "xaxis2": dict(**_PL["xaxis"], showticklabels=False),
-        "xaxis3": dict(**_PL["xaxis"], title="Time (s)"),
-        "yaxis": dict(**_PL["yaxis"], title="Major (g)"),
-        "yaxis2": dict(**_PL["yaxis"], title="Interm. (g)"),
-        "yaxis3": dict(**_PL["yaxis"], title="Vertical (g)"),
-    })
+    base.update(
+        {
+            "xaxis": dict(**_PL["xaxis"], showticklabels=False),
+            "xaxis2": dict(**_PL["xaxis"], showticklabels=False),
+            "xaxis3": dict(**_PL["xaxis"], title="Time (s)"),
+            "yaxis": dict(**_PL["yaxis"], title="Major (g)"),
+            "yaxis2": dict(**_PL["yaxis"], title="Interm. (g)"),
+            "yaxis3": dict(**_PL["yaxis"], title="Vertical (g)"),
+        }
+    )
     fig.update_layout(**base)
     for ann in fig.layout.annotations:
         ann.font = dict(size=11, color="#81A1C1")
@@ -467,15 +469,13 @@ def build_page() -> None:
 
     # ── Main two-column layout ─────────────────────────────────────────────────
     with (
-        ui
-        .row()
+        ui.row()
         .classes("w-full no-wrap items-start")
         .style("gap:0;min-height:calc(100vh - 52px)")
     ):
         # ── LEFT sidebar ──────────────────────────────────────────────────────
         with (
-            ui
-            .column()
+            ui.column()
             .classes("q-pa-sm q-gutter-sm sidebar-scroll")
             .style(
                 "width:296px;min-width:296px;overflow-y:auto;"
@@ -486,8 +486,7 @@ def build_page() -> None:
             with ui.card().classes("pcard q-pa-md w-full"):
                 ui.label("Earthquake and Site Scenario").classes("slabel q-mb-sm")
                 i_mw = (
-                    ui
-                    .number(
+                    ui.number(
                         "Moment Magnitude Mw",
                         value=6.5,
                         min=4.0,
@@ -499,8 +498,7 @@ def build_page() -> None:
                     .classes("w-full")
                 )
                 i_ztor = (
-                    ui
-                    .number(
+                    ui.number(
                         "Rupture Depth Ztor (km)",
                         value=3.0,
                         min=0.0,
@@ -512,8 +510,7 @@ def build_page() -> None:
                     .classes("w-full q-mt-sm")
                 )
                 i_fm = (
-                    ui
-                    .select(
+                    ui.select(
                         options=list(_FM_LABELS),
                         label="Fault Mechanism",
                         value="0 — Strike Slip",
@@ -522,8 +519,7 @@ def build_page() -> None:
                     .classes("w-full q-mt-sm")
                 )
                 i_rrup = (
-                    ui
-                    .number(
+                    ui.number(
                         "Rupture Distance Rrup (km)",
                         value=15.0,
                         min=1.0,
@@ -535,8 +531,7 @@ def build_page() -> None:
                     .classes("w-full q-mt-sm")
                 )
                 i_vs30 = (
-                    ui
-                    .number(
+                    ui.number(
                         "VS30 (m/s)",
                         value=800,
                         min=100,
@@ -552,8 +547,7 @@ def build_page() -> None:
 
                 ui.label("Model Settings").classes("slabel q-mb-sm")
                 i_nsmpl = (
-                    ui
-                    .number(
+                    ui.number(
                         "GMM Samples (0 = median only)",
                         value=0,
                         min=0,
@@ -564,8 +558,7 @@ def build_page() -> None:
                     .classes("w-full")
                 )
                 i_dt = (
-                    ui
-                    .number(
+                    ui.number(
                         "Time Step dt (s)",
                         value=0.005,
                         min=0.001,
@@ -577,8 +570,9 @@ def build_page() -> None:
                     .classes("w-full q-mt-sm")
                 )
                 i_nsim = (
-                    ui
-                    .number("Stochastic Realizations", value=1, min=1, max=100, step=1)
+                    ui.number(
+                        "Stochastic Realizations", value=1, min=1, max=100, step=1
+                    )
                     .props("dense outlined")
                     .classes("w-full q-mt-sm")
                 )
@@ -590,25 +584,55 @@ def build_page() -> None:
                     ui.space()
                     cond_toggle = ui.switch("").props("dense color=primary")
 
+                _cond_inputs = []
+
                 with ui.column().classes("w-full") as cond_box:
-                    i_cim = (
-                        ui
-                        .select(options=_COND_IMS, label="Target IM", value="M_Sa_1")
-                        .props("dense outlined")
-                        .classes("w-full")
-                    )
-                    i_cval = (
-                        ui
-                        .number(
-                            "Target Value (physical, e.g. g)",
-                            value=0.9,
-                            min=1e-4,
-                            step=0.01,
-                            format="%.4f",
-                        )
-                        .props("dense outlined")
-                        .classes("w-full q-mt-xs")
-                    )
+                    cond_list_container = ui.column().classes("w-full q-gutter-y-xs")
+
+                    def add_cond_row(im_val="M_Sa_1", num_val=0.9):
+                        with cond_list_container:
+                            with ui.column().classes("w-full q-pa-sm q-mb-xs").style("border: 1px dashed var(--border); border-radius: 6px; background: rgba(0,0,0,0.1);") as cond_item:
+                                with ui.row().classes("w-full items-center justify-between q-mb-xs"):
+                                    ui.label("Condition").style("font-size: 0.75rem; color: var(--text-muted); font-weight: 600;")
+                                    close_btn = ui.button(icon="close").props("flat dense color=negative").style("padding: 0; min-height: 0; min-width: 0;")
+                                
+                                cim = (
+                                    ui.select(
+                                        options=_COND_IMS,
+                                        label="Target IM",
+                                        value=im_val,
+                                    )
+                                    .props("dense outlined")
+                                    .classes("w-full")
+                                )
+                                cval = (
+                                    ui.number(
+                                        "Target Value (e.g. g)",
+                                        value=num_val,
+                                        min=1e-4,
+                                        step=0.01,
+                                        format="%.4f",
+                                    )
+                                    .props("dense outlined")
+                                    .classes("w-full q-mt-xs")
+                                )
+
+                                def remove_self(e, r=cond_item, c=cim, v=cval):
+                                    r.delete()
+                                    if (c, v) in _cond_inputs:
+                                        _cond_inputs.remove((c, v))
+                                        
+                                close_btn.on_click(remove_self)
+                                
+                            _cond_inputs.append((cim, cval))
+
+                    add_cond_row()
+
+                    ui.button(
+                        "Add Condition",
+                        icon="add",
+                        on_click=lambda: add_cond_row(im_val="M_Sa_1", num_val=0.9),
+                    ).props("flat dense color=primary").classes("w-full q-mt-xs")
 
                 cond_box.set_visibility(False)
                 cond_toggle.on_value_change(lambda e: cond_box.set_visibility(e.value))
@@ -618,8 +642,7 @@ def build_page() -> None:
                 ui.label("Output Settings").classes("slabel q-mb-sm")
                 with ui.row().classes("w-full"):
                     i_outdir = (
-                        ui
-                        .input("Save Directory", value=str(OUT_DIR))
+                        ui.input("Save Directory", value=str(OUT_DIR))
                         .props("outlined dense")
                         .classes("flex-grow")
                     )
@@ -642,8 +665,7 @@ def build_page() -> None:
             with ui.card().classes("pcard w-full q-pa-none").style("overflow:hidden"):
                 # Tab bar
                 with (
-                    ui
-                    .tabs()
+                    ui.tabs()
                     .props("dense active-color=primary indicator-color=primary")
                     .classes("w-full q-px-sm") as tabs
                 ):
@@ -706,8 +728,12 @@ def build_page() -> None:
         )
 
     def _conditions() -> dict | None:
-        if cond_toggle.value:
-            return {str(i_cim.value): float(i_cval.value or 0.9)}
+        if cond_toggle.value and _cond_inputs:
+            conds = {}
+            for cim, cval in _cond_inputs:
+                if cim.value:
+                    conds[str(cim.value)] = float(cval.value or 0.9)
+            return conds if conds else None
         return None
 
     def _out_dir() -> Path:
@@ -791,9 +817,9 @@ def build_page() -> None:
                         save_timeseries(gm_list, fp, dt=_s.sim_dt)
                         ui.notify(f"Saved: {fp}", type="positive")
 
-                    ui.button(f"Save {label.lower()}", icon="save", on_click=_save_ts).props(
-                        "flat color=grey-4"
-                    ).style("font-size:.8rem")
+                    ui.button(
+                        f"Save {label.lower()}", icon="save", on_click=_save_ts
+                    ).props("flat color=grey-4").style("font-size:.8rem")
 
     def _render_spectra() -> None:
         sa_panel.clear()
@@ -897,14 +923,20 @@ def build_page() -> None:
 #  Entry point
 # ─────────────────────────────────────────────────────────────────────────────
 def run_app():
+    import os
+    port = int(os.environ.get("PORT", 8080))
+    host = os.environ.get("HOST", "127.0.0.1")
+    show = os.environ.get("SHOW", "true").lower() == "true"
+
     ui.run(
         root=build_page,
         title="PINAGMM",
         dark=True,
         favicon="🌊",
-        port=8080,
+        host=host,
+        port=port,
         reload=False,
-        show=True,
+        show=show,
     )
 
 
