@@ -1,0 +1,13 @@
+cff-version: 1.2.0
+message: "If you use this software in your research or grant proposals, please cite it as below."
+authors:
+  - family-names: "Hussaini"
+    given-names: "S. M. Sajad"
+    email: "hussaini.smsajad@gmail.com"
+title: "PINAGMM: Physics-Informed Neural Additive Ground Motion Model"
+version: 0.6.0
+doi: 10.5281/zenodo.20746843
+date-released: 2026-08-05
+url: "https://github.com/Sajad-Hussaini/pinagmm"
+repository-code: "https://github.com/Sajad-Hussaini/pinagmm"
+license: GPL-3.0-or-later

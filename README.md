@@ -5,7 +5,7 @@
 
   <p>
     <a href="https://www.python.org/downloads/"><img src="https://img.shields.io/badge/python-3.8+-blue.svg" alt="Python"></a>
-    <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License"></a>
+    <a href="https://www.gnu.org/licenses/gpl-3.0"><img src="https://img.shields.io/badge/license-GPL--3.0-blue.svg" alt="License"></a>
     <a href="https://pinagmm.onrender.com"><img src="https://img.shields.io/badge/Live-Web_App-success?style=flat&logo=render" alt="Live Web App"></a>
     <a href="https://doi.org/10.5281/zenodo.20746843"><img src="https://zenodo.org/badge/DOI/10.5281/zenodo.20746843.svg" alt="DOI"></a>
   </p>
@@ -13,7 +13,7 @@
 
 **PINAGMM** is a unified multivariate generative framework that bridges the prediction of discrete intensity measures (IMs) with the synthesis of hazard-compatible, three-component stochastic ground motion time-series. 
 
-Developed for performance-based earthquake engineering, this framework uses a Physics-Informed Neural Additive Model (NAM) coupled with Multivariate Mixed-Effects Regression (MMER). It enables the direct conditional simulation of physically coherent synthetic ground motions for prescribed hazard scenarios, completely bypassing the need for artificial time-domain spectral matching.
+Developed for performance-based earthquake engineering, this framework uses a Physics-Informed Neural Additive Model (NAM) coupled with [Multivariate Mixed-Effects Regression (MMER)](https://github.com/Sajad-Hussaini/mmer). It enables the direct conditional simulation of physically coherent synthetic ground motions for prescribed hazard scenarios, completely bypassing the need for artificial time-domain spectral matching.
 
 ## Table of Contents
 - [Installation](#installation)
@@ -161,18 +161,33 @@ For any questions, assistance, or suggestions, please feel free to contact:
 
 > Please include "PINAGMM" in the subject line for a quicker response.
 
-> If you find this package useful, contributions to help maintain and improve it, are always appreciated. [![PayPal](https://img.shields.io/badge/PayPal-Donate-blue.svg)](https://www.paypal.com/paypalme/sajadhussaini)
+## License
+
+**PINAGMM** is distributed under the **GNU General Public License v3 (GPLv3)**. 
+
+You are free to use, modify, and distribute this software for academic and research purposes. Any commercial use or distribution of modified versions requires the entire project to be open-sourced under the same GPLv3 license. For proprietary commercial exemptions, please refer to the Contact section.
 
 ## References
 
-Please cite the following references for any formal study:  
+If you use PINAGMM in your research, please cite the following references:
 
-**[1] Primary Reference**  
+**[1] Primary Reference (Methodology)**  
 *A Physics-Informed Neural Additive Ground Motion Model for Hazard-Compatible Three-Component Stochastic Simulation*  
 *DOI: to be added later*  
 (Journal of Earthquake Engineering & Structural Dynamics)
 
-**[2] PINAGMM Package**  
+**[2] PINAGMM Software Package**  
 *Physics-Informed Neural Additive Ground Motion Model*  
-*DOI: [https://doi.org/10.5281/zenodo.18068839](https://doi.org/10.5281/zenodo.20746843)*  
+*DOI: [https://doi.org/10.5281/zenodo.20746843](https://doi.org/10.5281/zenodo.20746843)*
+
+```bibtex
+@software{Hussaini_PINAGMM_2026,
+  author = {Hussaini, S. M. Sajad},
+  title = {{PINAGMM: Physics-Informed Neural Additive Ground Motion Model}},
+  url = {https://github.com/Sajad-Hussaini/PINAGMM},
+  version = {0.6.0},
+  year = {2026},
+  doi = {10.5281/zenodo.20746843}
+}
+```  
 

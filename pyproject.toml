@@ -4,11 +4,11 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pinagmm"
-version = "0.6.0"
+version = "0.7.0"
 authors = [{name = "Sajad Hussaini", email = "hussaini.smsajad@gmail.com"}]
 description = "A Physics-Informed Neural Additive Ground Motion Model for Hazard-Compatible Three-Component Stochastic Simulation."
 readme = "README.md"
-license = "MIT"
+license = "GPL-3.0-or-later"
 requires-python = ">=3.12"
 keywords = [
     "ground motion models",
@@ -23,6 +23,7 @@ classifiers = [
     "Operating System :: OS Independent",
     "Intended Audience :: Science/Research",
     "Topic :: Scientific/Engineering",
+    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
 ]
 dependencies = [
     "numpy",
