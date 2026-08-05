@@ -5,7 +5,7 @@ authors:
     given-names: "S. M. Sajad"
     email: "hussaini.smsajad@gmail.com"
 title: "PINAGMM: Physics-Informed Neural Additive Ground Motion Model"
-version: 0.6.0
+version: 0.7.0
 doi: 10.5281/zenodo.20746843
 date-released: 2026-08-05
 url: "https://github.com/Sajad-Hussaini/pinagmm"

@@ -165,7 +165,7 @@ For any questions, assistance, or suggestions, please feel free to contact:
 
 **PINAGMM** is distributed under the **GNU General Public License v3 (GPLv3)**. 
 
-You are free to use, modify, and distribute this software for academic and research purposes. Any commercial use or distribution of modified versions requires the entire project to be open-sourced under the same GPLv3 license. For proprietary commercial exemptions, please refer to the Contact section.
+> You are free to use, modify, and distribute this software for academic and research purposes. Any commercial use or distribution of modified versions requires the entire project to be open-sourced under the same GPLv3 license. For proprietary commercial exemptions, please refer to the Contact section.
 
 ## References
 
