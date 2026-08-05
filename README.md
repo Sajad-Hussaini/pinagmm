@@ -23,6 +23,7 @@ Developed for performance-based earthquake engineering, this framework uses a Ph
   - [1. Median Predictions](#1-median-predictions-predict)
   - [2. Stochastic Simulation (Unconditional & Conditional)](#2-stochastic-simulation)
 - [Contact & Support](#contact--support)
+- [License](#license)
 - [References](#references)
 
 ## Installation
@@ -179,15 +180,4 @@ If you use PINAGMM in your research, please cite the following references:
 **[2] PINAGMM Software Package**  
 *Physics-Informed Neural Additive Ground Motion Model*  
 *DOI: [https://doi.org/10.5281/zenodo.20746843](https://doi.org/10.5281/zenodo.20746843)*
-
-```bibtex
-@software{Hussaini_PINAGMM_2026,
-  author = {Hussaini, S. M. Sajad},
-  title = {{PINAGMM: Physics-Informed Neural Additive Ground Motion Model}},
-  url = {https://github.com/Sajad-Hussaini/PINAGMM},
-  version = {0.6.0},
-  year = {2026},
-  doi = {10.5281/zenodo.20746843}
-}
-```  
 

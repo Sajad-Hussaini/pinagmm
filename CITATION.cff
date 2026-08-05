@@ -5,9 +5,24 @@ authors:
     given-names: "S. M. Sajad"
     email: "hussaini.smsajad@gmail.com"
 title: "PINAGMM: Physics-Informed Neural Additive Ground Motion Model"
-version: 0.7.0
+version: 0.8.0
 doi: 10.5281/zenodo.20746843
 date-released: 2026-08-05
 url: "https://github.com/Sajad-Hussaini/pinagmm"
 repository-code: "https://github.com/Sajad-Hussaini/pinagmm"
 license: GPL-3.0-or-later
+
+preferred-citation:
+  type: article
+  authors:
+    - family-names: "Hussaini"
+      given-names: "S. M. Sajad"
+      email: "hussaini.smsajad@gmail.com"
+  title: "A Physics-Informed Neural Additive Ground Motion Model for Hazard-Compatible Three-Component Stochastic Simulation"
+  journal: "Journal of Earthquake Engineering & Structural Dynamics"
+  year: 2026
+  # doi: "10.1002/eqe.XXXX" # TODO: Uncomment and add DOI when published
+  # volume: 1             # TODO: Update when published
+  # issue: 1              # TODO: Update when published
+  # start: 1              # TODO: Update when published
+  # end: 10               # TODO: Update when published
