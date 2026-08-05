@@ -7,7 +7,7 @@
     <a href="https://www.python.org/downloads/"><img src="https://img.shields.io/badge/python-3.8+-blue.svg" alt="Python"></a>
     <a href="https://opensource.org/licenses/GPL-3.0"><img src="https://img.shields.io/badge/license-GPLv3-blue.svg" alt="License"></a>
     <a href="https://pinagmm.onrender.com"><img src="https://img.shields.io/badge/Live-Web_App-success?style=flat&logo=render" alt="Live Web App"></a>
-    <a href="https://doi.org/10.5281/zenodo.20746843"><img src="https://zenodo.org/badge/DOI/10.5281/zenodo.20746843.svg" alt="DOI"></a>
+    <a href="https://doi.org/10.5281/zenodo.20746843"><img src="https://img.shields.io/badge/DOI-10.5281%2Fzenodo.20746843-blue.svg" alt="DOI"></a>
   </p>
 </div>
 
