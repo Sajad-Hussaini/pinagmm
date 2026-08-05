@@ -5,7 +5,7 @@
 
   <p>
     <a href="https://www.python.org/downloads/"><img src="https://img.shields.io/badge/python-3.8+-blue.svg" alt="Python"></a>
-    <a href="https://www.gnu.org/licenses/gpl-3.0"><img src="https://img.shields.io/badge/license-GPL--3.0-blue.svg" alt="License"></a>
+    <a href="https://opensource.org/licenses/GPL-3.0"><img src="https://img.shields.io/badge/license-GPLv3-blue.svg" alt="License"></a>
     <a href="https://pinagmm.onrender.com"><img src="https://img.shields.io/badge/Live-Web_App-success?style=flat&logo=render" alt="Live Web App"></a>
     <a href="https://doi.org/10.5281/zenodo.20746843"><img src="https://zenodo.org/badge/DOI/10.5281/zenodo.20746843.svg" alt="DOI"></a>
   </p>
@@ -164,7 +164,7 @@ For any questions, assistance, or suggestions, please feel free to contact:
 
 ## License
 
-**PINAGMM** is distributed under the **GNU General Public License v3 (GPLv3)**. 
+**PINAGMM** is distributed under the [**GNU General Public License v3 (GPLv3)**](https://opensource.org/licenses/GPL-3.0). See the [LICENSE](LICENSE) file for the full text.
 
 > You are free to use, modify, and distribute this software for academic and research purposes. Any commercial use or distribution of modified versions requires the entire project to be open-sourced under the same GPLv3 license. For proprietary commercial exemptions, please refer to the Contact section.
 
