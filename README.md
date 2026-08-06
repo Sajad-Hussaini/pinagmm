@@ -13,7 +13,7 @@
 
 **PINAGMM** is a unified multivariate generative framework that bridges the prediction of discrete intensity measures (IMs) with the synthesis of hazard-compatible, three-component stochastic ground motion time-series. 
 
-Developed for performance-based earthquake engineering, this framework uses a Physics-Informed Neural Additive Model (NAM) coupled with [Multivariate Mixed-Effects Regression (MMER)](https://github.com/Sajad-Hussaini/mmer). It enables the direct conditional simulation of physically coherent synthetic ground motions for prescribed hazard scenarios, completely bypassing the need for artificial time-domain spectral matching.
+Developed for performance-based earthquake engineering, this framework uses a Physics-Informed Neural Additive Model (NAM) coupled with [Multivariate Mixed-Effects Regression (MMER)](https://github.com/Sajad-Hussaini/mmer). It enables the direct conditional simulation of physically coherent synthetic ground motions using [a Stochastic Simulation Engine (SGSIM)](https://github.com/Sajad-Hussaini/sgsim) for prescribed hazard scenarios, completely bypassing the need for artificial time-domain spectral matching.
 
 ## Table of Contents
 - [Installation](#installation)
