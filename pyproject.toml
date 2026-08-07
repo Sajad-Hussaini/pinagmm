@@ -29,7 +29,7 @@ dependencies = [
     "pandas",
     "scikit-learn==1.8.0",
     "torch",
-    "mmer==1.4.4",
+    "mmer==1.4.5",
     "sgsim==1.6.2",
     "matplotlib",
     "dash==4.4.1",
