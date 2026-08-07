@@ -27,7 +27,7 @@ Powered by a Physics-Informed Neural Additive Model (NAM) coupled with [Multivar
 
 ## Installation
 
-Install **PINAGMM** directly from GitHub with a single command:
+Install **PINAGMM** directly from GitHub with a single command in your terminal:
 
 ```bash
 pip install git+https://github.com/Sajad-Hussaini/pinagmm.git
@@ -54,13 +54,16 @@ pinagmm
 
 This automatically opens the PINAGMM interface in your web browser.
 
-### Key Capabilities & Deliverables
-- **Earthquake Scenario Inputs:** Easily define scenario parameters including moment magnitude ($M_w$), rupture distance ($R_{rup}$), top of rupture depth ($Z_{tor}$), site condition ($V_{s30}$), and fault mechanism ($F_m$).
-- **Hazard-Targeting (Conditional Simulation):** Prescribe specific target hazard levels (e.g., conditioning Spectral Acceleration at $T=1.0\text{ s}$ to a target physical value).
-- **GMM Prediction and Response Spectra Visualization:** Instantly generate and display output of GMM predictions and corresponding response spectra across Major, Intermediate, and Vertical axes.
-- **Stochastic Time-Series Simulation:** Synthesize full 3-component ground motion time-series (acceleration, velocity, displacement) and their Fourier Amplitude and Response Spectra.
-- **One-Click Export:** Export all predicted parameters, simulated ground motion records, and fourier amplitude and response spectra directly to CSV files.
+<details>
+<summary><b>Key Capabilities & Deliverables</b></summary>
 
+- **Earthquake Scenario Inputs:**
+- **Hazard-Targeting (Conditional Simulation):**
+- **GMM Prediction and Response Spectra Visualization:**
+- **Stochastic Time-Series Simulation:**
+- **One-Click Downloading Data:**
+
+</details>
 
 ## Web Demo App
 
@@ -74,16 +77,20 @@ For users who want to explore the interface without installing the package, a ho
 
 If you need to automate batch calculations, integrate PINAGMM into existing engineering scripts, or build custom simulation workflows, PINAGMM provides a simple Python API.
 
-A fully functional reference script is provided in the repository:
+A fully functional reference script is provided in the repository example folder:
 📄 **[`example/run_me.py`](example/run_me.py)**
 
-The example script demonstrates:
-1. **Median Predictions:** Calculating intensity measures and stochastic parameters for a given scenario and exporting them to CSV.
-2. **Unconditional Stochastic Simulation:** Generating multiple 3-component time-series realizations using the median GMM prediction.
-3. **Conditional Hazard Simulation:** Prescribing target hazard conditions and synthesizing target-compatible ground motions.
-4. **Data Export & Plotting:** Saving generated time-series waveforms and response spectra to CSV files and generating publication-ready plots.
+<details>
+<summary><b>Example Demonstration</b></summary>
 
-You can run the script directly from your terminal:
+1. **Median Predictions:**
+2. **Unconditional Stochastic Simulation:**
+3. **Conditional Hazard Simulation:**
+4. **Data Export & Plotting:**
+
+</details>
+
+You can run the script directly from your terminal and see results on your desktop:
 ```bash
 python example/run_me.py
 ```
