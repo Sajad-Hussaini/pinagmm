@@ -23,5 +23,5 @@ For the interactive GUI run in your terminal:
 from .core.gmm import PINAGMM
 from .core.io import save_timeseries, save_spectra
 
-__version__ = "0.9.0"
+__version__ = "0.9.1"
 __all__ = ["PINAGMM", "save_timeseries", "save_spectra"]
