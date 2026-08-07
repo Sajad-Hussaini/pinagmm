@@ -677,7 +677,7 @@ def register_charts_callbacks(app) -> None:
         if not pred_json:
             return empty, html.Div(), _SHOW
 
-        pred_df = pd.read_json(pred_json, orient="split")
+        pred_df = pd.read_json(io.StringIO(pred_json), orient="split")
         n_rows = len(pred_df)
         spec_fig = fig_pred_spectra(pred_df, n_rows)
         rows, col_defs = _build_im_table(pred_df)
@@ -854,7 +854,7 @@ def register_charts_callbacks(app) -> None:
     def dl_pred(n, pred_json):
         if not n or not pred_json:
             raise PreventUpdate
-        pred_df = pd.read_json(pred_json, orient="split")
+        pred_df = pd.read_json(io.StringIO(pred_json), orient="split")
         n_rows = len(pred_df)
         # Build a tidy IM table identical to what the DataTable shows
         rows, _ = _build_im_table(pred_df)
@@ -871,7 +871,7 @@ def register_charts_callbacks(app) -> None:
     def dl_ims(n, pred_json):
         if not n or not pred_json:
             raise PreventUpdate
-        pred_df = pd.read_json(pred_json, orient="split")
+        pred_df = pd.read_json(io.StringIO(pred_json), orient="split")
         rows, _ = _build_im_table(pred_df)
         out_df = pd.DataFrame(rows)
         return _send_csv_with_bom(out_df, "pinagmm_intensity_measures.csv")
