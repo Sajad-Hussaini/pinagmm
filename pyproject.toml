@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pinagmm"
-version = "0.8.0"
+version = "0.9.0"
 authors = [{name = "Sajad Hussaini", email = "hussaini.smsajad@gmail.com"}]
 description = "A Physics-Informed Neural Additive Ground Motion Model for Hazard-Compatible Three-Component Stochastic Simulation."
 readme = "README.md"
@@ -29,11 +29,12 @@ dependencies = [
     "pandas",
     "scikit-learn==1.8.0",
     "torch",
-    "mmer==1.4.2",
-    "sgsim==1.5.1",
+    "mmer==1.4.4",
+    "sgsim==1.6.2",
     "matplotlib",
-    "nicegui>=1.4",
-    "plotly",
+    "dash==4.4.1",
+    "dash-bootstrap-components==2.0.4",
+    "plotly==6.9.0",
 ]
 
 [project.urls]
@@ -41,17 +42,12 @@ Homepage   = "https://github.com/Sajad-Hussaini/PINAGMM"
 Repository = "https://github.com/Sajad-Hussaini/PINAGMM"
 Issues     = "https://github.com/Sajad-Hussaini/PINAGMM/issues"
 
-[tool.setuptools]
-packages = [
-    "pinagmm",
-    "pinagmm.core",
-    "pinagmm.gui",
-    "pinagmm.model",
-]
+[tool.setuptools.packages.find]
+where = ["src"]
 
 [tool.setuptools.package-data]
 "pinagmm.model" = ["*.joblib"]
-"pinagmm.gui" = ["assets/*"]
+"pinagmm.gui" = ["assets/*", "assets/**/*"]
 
 [project.scripts]
 pinagmm = "pinagmm.gui.app:run_app"

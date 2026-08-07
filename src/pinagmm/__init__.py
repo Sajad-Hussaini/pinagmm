@@ -16,12 +16,12 @@ Quick start
 ...                                   Vs30=800.0, Fm="0", n_simulations=3)
 >>> save_timeseries(ts_m, "major_component.csv")
 
-For the interactive GUI run:
-    python -m pinagmm.gui
+For the interactive GUI run in your terminal:
+    pinagmm
 """
 
 from .core.gmm import PINAGMM
 from .core.io import save_timeseries, save_spectra
 
-__version__ = "0.8.0"
+__version__ = "0.9.0"
 __all__ = ["PINAGMM", "save_timeseries", "save_spectra"]

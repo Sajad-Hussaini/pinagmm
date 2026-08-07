@@ -27,12 +27,10 @@ References
 """
 
 from __future__ import annotations
-
 import joblib
 import numpy as np
 import pandas as pd
 from pathlib import Path
-
 from sgsim import StochasticModel
 from .variables import yvars
 
@@ -46,9 +44,6 @@ class PINAGMM:
     Intermediate, Vertical) using a Neural Additive Model coupled with
     Multivariate Mixed-Effects Regression.
 
-    Parameters are loaded automatically from the bundled model files on
-    first instantiation.
-
     Examples
     --------
     >>> gmm = PINAGMM()
@@ -56,18 +51,18 @@ class PINAGMM:
     Median prediction:
     >>> df = gmm.predict(Mw=6.5, Ztor=3.0, Rrup=15.0, Vs30=800.0, Fm="0")
 
-    Simulate ground motions (median parameters, 3 realizations):
+    Simulate ground motions (median parameters for 3 realizations):
     >>> ts_m, ts_i, ts_v = gmm.simulate(Mw=6.5, Ztor=3.0, Rrup=15.0,
     ...                                  Vs30=800.0, Fm="0", n_simulations=3)
 
-    Conditional simulation (target Sa(1s)=0.9 g):
+    Conditional simulation (target Sa(1s)=0.9 g) for 10 samples from GMM distribution and 1 realization each:
     >>> ts_m_list, ts_i_list, ts_v_list = gmm.simulate(
     ...     Mw=6.5, Ztor=3.0, Rrup=15.0, Vs30=800.0, Fm="0",
     ...     conditions={"M_Sa_1": 0.9}, n_samples=10, n_simulations=1)
     """
 
     def __init__(self):
-        model_dir = Path(__file__).resolve().parent.parent / "model"
+        model_dir = Path(__file__).parent.parent / "model"
         self.preprocessor_x = joblib.load(model_dir / "xprocessor.joblib")
         self.scaler_y = joblib.load(model_dir / "yscaler.joblib")
         self.model = joblib.load(model_dir / "trained_model.joblib")
@@ -120,50 +115,29 @@ class PINAGMM:
         random_state=None,
     ) -> pd.DataFrame:
         """
-        Predict intensity measures and simulation parameters.
-
-        Returns a DataFrame whose first row (per scenario) is the predicted
-        **median** and whose subsequent rows are Monte-Carlo samples drawn from
-        the learned inter-IM covariance matrix.
+        Predict intensity measures and stochastic simulation parameters.
 
         Parameters
         ----------
-        Mw : float or array-like
-            Moment magnitude.
-        Ztor : float or array-like
-            Depth to top of rupture (km).
-        Rrup : float or array-like
-            Closest rupture distance (km).
-        Vs30 : float or array-like
-            Time-averaged shear-wave velocity in the top 30 m (m/s).
-        Fm : str or array-like
-            Fault mechanism:  "0" = Normal,  "1" = Reverse,  "2" = Strike-Slip.
+        Mw, Ztor, Rrup, Vs30, Fm : float or array-like
+            Earthquake scenario inputs (Magnitude, Ztor km, Rrup km, Vs30 m/s, rake mechanism).
         n_sample : int, optional
-            Number of GMM samples to generate (default 0 → median only).
+            Number of random GMM samples to draw.
+            - ``0`` (default): Returns 1 row per scenario (the deterministic median prediction).
+            - ``> 0``: Returns exactly ``n_sample`` rows per scenario sampled from the GMM
+              multivariate normal distribution.
         conditions : dict, optional
-            Conditional sampling target.  Map output names (e.g., ``"M_Sa_1"``)
-            to their physical values (e.g., ``0.9`` for 0.9 g).  The model
-            computes the conditional mean and covariance via the Schur complement
-            and samples from the constrained distribution.
+           Conditional hazard target (e.g., ``{"M_Sa_1": 0.9}``). Constrains predictions to
+           match target values while computing conditional mean and covariance.
         random_state : int, optional
-            Seed for the random number generator.
+            Seed for random number generator reproducibility.
 
         Returns
         -------
         pd.DataFrame
-            Columns = input scenario features + all ``yvars``.
-            Row layout per scenario (N = number of input scenarios,
-            n_sample = number of GMM samples):
-
-            =========  ==================================================
-            Row index  Content
-            =========  ==================================================
-            0          Median (or conditional mean)
-            1 … S      S = n_sample independent samples
-            =========  ==================================================
-
-            When N > 1 scenarios, rows are interleaved:
-            ``[scen0_median, scen0_s1, …, scen1_median, scen1_s1, …]``.
+            Input scenario columns + predicted intensity measures and parameters.
+            - When ``n_sample == 0``: Exactly 1 row per input scenario.
+            - When ``n_sample > 0``: Exactly ``n_sample`` rows per input scenario.
         """
         if n_sample < 0:
             raise ValueError(f"n_sample must be >= 0, got {n_sample}.")
@@ -203,25 +177,19 @@ class PINAGMM:
             cond_cov_rr = Σ_rr - Σ_rf @ np.linalg.solve(Σ_ff, Σ_fr)
             cond_cov_rr = 0.5 * (cond_cov_rr + cond_cov_rr.T)
 
-            # Full conditional mean (fixed dims clamped, free dims updated)
-            full_cond_mu = np.empty((N, D), dtype=float)
-            full_cond_mu[:, fixed_idx] = fixed_scaled
-            full_cond_mu[:, free_idx] = cond_mean_r
-
             if n_sample > 0:
                 noise = rng.multivariate_normal(
                     np.zeros(len(free_idx)), cond_cov_rr, size=(N, n_sample)
                 )
                 free_smp = noise + cond_mean_r[:, np.newaxis, :]  # (N, S, |free|)
 
-                samples = np.empty((N, n_sample, D), dtype=float)
-                samples[:, :, fixed_idx] = fixed_scaled
-                samples[:, :, free_idx] = free_smp
-
-                combined = np.concatenate(
-                    [full_cond_mu[:, np.newaxis, :], samples], axis=1
-                )
+                combined = np.empty((N, n_sample, D), dtype=float)
+                combined[:, :, fixed_idx] = fixed_scaled
+                combined[:, :, free_idx] = free_smp
             else:
+                full_cond_mu = np.empty((N, D), dtype=float)
+                full_cond_mu[:, fixed_idx] = fixed_scaled
+                full_cond_mu[:, free_idx] = cond_mean_r
                 combined = full_cond_mu[:, np.newaxis, :]  # (N, 1, D)
 
         else:
@@ -229,12 +197,13 @@ class PINAGMM:
                 noise = rng.multivariate_normal(
                     np.zeros(D), marg_cov, size=(N, n_sample)
                 )
-                samples = noise + mu[:, np.newaxis, :]  # (N, S, D)
-                combined = np.concatenate([mu[:, np.newaxis, :], samples], axis=1)
+                combined = noise + mu[:, np.newaxis, :]  # (N, S, D)
             else:
-                combined = mu[:, np.newaxis, :]  # (N, 1, D)
+                combined = mu[:, np.newaxis, :]  # (N, 1, D) — median only
 
-        # combined shape: (N, 1+n_sample, D) → flatten to (N*(1+n_sample), D)
+        repeats = 1 if n_sample == 0 else n_sample
+
+        # combined shape: (N, repeats, D) → flatten to (N*repeats, D)
         combined = combined.reshape(-1, D)
 
         # ── Back to physical space ──────────────────────────────────────────
@@ -244,7 +213,6 @@ class PINAGMM:
 
         df_pred = pd.DataFrame(physical, columns=yvars)
 
-        repeats = 1 + n_sample
         df_input_rep = df_input.loc[df_input.index.repeat(repeats)].reset_index(
             drop=True
         )
@@ -355,45 +323,31 @@ class PINAGMM:
         n_simulations: int = 1,
     ):
         """
-        Predict parameters from the GMM and generate stochastic time-series.
+        Predict parameters from GMM and generate stochastic ground motion time-series.
 
-        This combines ``predict()`` (for GMM parameters) with
-        ``sgsim.StochasticModel`` (for time-series generation) into a single
-        convenient call.
+        Combines parameter prediction with the stochastic simulation engine (sgsim).
 
         Parameters
         ----------
         Mw, Ztor, Rrup, Vs30, Fm :
-            Earthquake scenario (see ``predict()`` for details).
+            Earthquake scenario inputs.
         conditions : dict, optional
-            Conditional hazard target, e.g. ``{"M_Sa_1": 0.9}``.
+            Conditional hazard target (e.g. ``{"M_Sa_1": 0.9}``).
         random_state : int, optional
-            Seed for reproducibility.
+            Seed for random number generator reproducibility.
         dt : float
-            Simulation time step in seconds (default 0.005 s = 200 Hz).
+            Time step in seconds (default 0.005 s = 200 Hz).
         n_samples : int
-            Number of parameter sets to draw from the GMM covariance matrix.
-            ``0`` uses the deterministic median prediction.
+            Number of parameter sets drawn from GMM distribution (default 0 → median prediction).
         n_simulations : int
-            Number of independent time-series realisations per parameter set
-            (controls phase aleatory variability from the stochastic engine).
+            Number of independent stochastic time-series realisations per parameter set.
 
         Returns
         -------
         ts_m_list, ts_i_list, ts_v_list : tuple of lists
-            Three lists, each containing ``max(1, n_samples)`` ``GroundMotion``
-            objects (one per GMM sample), each with ``.ac`` of shape
-            ``(n_simulations, npts_i)`` (where ``npts`` may differ between samples
-            because duration varies).
-
-        Notes
-        -----
-        The two levels of variability:
-
-        ===============  ==============================================
-        ``n_samples``    GMM parameter variability (inter-event + σ)
-        ``n_simulations`` Phase aleatory variability (stochastic engine)
-        ===============  ==============================================
+            Three lists of ``GroundMotion`` instances (Major, Intermediate, Vertical components).
+            - When ``n_samples == 0``: Lists contain 1 ``GroundMotion`` object (for median parameters).
+            - When ``n_samples > 0``: Lists contain ``n_samples`` ``GroundMotion`` objects.
         """
         if n_samples < 0:
             raise ValueError(f"n_samples must be >= 0, got {n_samples}.")
@@ -415,20 +369,15 @@ class PINAGMM:
             """Create three GroundMotion objects from one parameter row."""
             m_p, i_p, v_p, _, _, _ = self.extract_components(row_values, dt=dt)
             return (
-                StochasticModel.from_dict(m_p).simulate(n=n_simulations),
-                StochasticModel.from_dict(i_p).simulate(n=n_simulations),
-                StochasticModel.from_dict(v_p).simulate(n=n_simulations),
+                StochasticModel.from_dict(m_p).simulate(n=n_simulations, unit="g"),
+                StochasticModel.from_dict(i_p).simulate(n=n_simulations, unit="g"),
+                StochasticModel.from_dict(v_p).simulate(n=n_simulations, unit="g"),
             )
 
-        if n_samples == 0:
-            # Always return a list, even for the deterministic median
-            ts_m, ts_i, ts_v = _build_trio(df_pred[yvars].iloc[0].values)
-            return [ts_m], [ts_i], [ts_v]
-
-        # Row 0 = median (skipped); rows 1 … n_samples = GMM samples
+        n_rows = len(df_pred)
         ts_m_list, ts_i_list, ts_v_list = [], [], []
-        for row in range(1, n_samples + 1):
-            ts_m, ts_i, ts_v = _build_trio(df_pred[yvars].iloc[row].values)
+        for r in range(n_rows):
+            ts_m, ts_i, ts_v = _build_trio(df_pred[yvars].iloc[r].values)
             ts_m_list.append(ts_m)
             ts_i_list.append(ts_i)
             ts_v_list.append(ts_v)

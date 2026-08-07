@@ -1,0 +1,904 @@
+/* ══════════════════════════════════════════════════════════════════
+   PINAGMM — Design System
+   Professional light canvas · Deep dark sidebar
+   (Mirrors the sgsim design system — same variables, same palette)
+   ══════════════════════════════════════════════════════════════════ */
+
+/* ─── Custom Properties ─────────────────────────────────────────── */
+:root {
+  /* Page & Surface */
+  --bg-page: #f0f4f8;
+  --bg-surface: #ffffff;
+  --bg-surface-2: #f8fafc;
+  --border: #e2e8f0;
+  --border-strong: #cbd5e1;
+
+  /* Dark Sidebar */
+  --sb-bg: #1e293b;
+  --sb-bg-2: #263347;
+  --sb-bg-3: #182235;
+  --sb-bg-hover: #2d3f57;
+  --sb-text: #cbd5e1;
+  --sb-text-muted: #64748b;
+  --sb-border: rgba(255, 255, 255, 0.08);
+
+  /* Accent — indigo */
+  --accent: #4f46e5;
+  --accent-hover: #4338ca;
+  --accent-light: #eef2ff;
+  --accent-muted: rgba(79, 70, 229, 0.12);
+  --accent-on-dark: #a5b4fc;
+  /* indigo-300 — accent on dark bg */
+
+  /* Second accent — emerald (Simulate) */
+  --accent2: #059669;
+  --accent2-hover: #047857;
+  --accent2-muted: rgba(5, 150, 105, 0.12);
+  --accent2-on-dark: #6ee7b7;
+
+  /* Status */
+  --success: #059669;
+  --warning: #d97706;
+  --error: #dc2626;
+  --error-bg: #fef2f2;
+  --error-border: #fecaca;
+
+  /* Text */
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
+
+  /* Layout */
+  --sidebar-w: 290px;
+  --navbar-h: 52px;
+
+  /* Radii */
+  --r-sm: 6px;
+  --r-md: 10px;
+  --r-lg: 14px;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.07), 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.05), 0 4px 14px rgba(0, 0, 0, 0.05);
+
+  /* Typography */
+  --font: 'Inter', 'Segoe UI', -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Mono', 'Consolas', monospace;
+
+  /* Component colours */
+  --col-major: #4f46e5;
+  /* indigo   */
+  --col-inter: #0891b2;
+  /* cyan     */
+  --col-vert: #059669;
+  /* emerald  */
+}
+
+/* ─── Reset & Base ───────────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  font-family: var(--font);
+  background: var(--bg-page);
+  color: var(--text-primary);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ─── Scrollbar ──────────────────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+/* Dark sidebar scrollbar */
+.pinagmm-sidebar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.pinagmm-sidebar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.22);
+}
+
+
+/* ═══════════════════════════════════════════
+   NAVBAR
+   ═══════════════════════════════════════════ */
+.pinagmm-navbar {
+  height: var(--navbar-h);
+  background: var(--bg-surface) !important;
+  border-bottom: 1px solid var(--border) !important;
+  box-shadow: var(--shadow-sm);
+  padding: 0 20px;
+  display: flex !important;
+  align-items: center;
+  gap: 12px;
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  flex-wrap: nowrap !important;
+}
+
+.navbar-logo {
+  height: 28px;
+  width: auto;
+  flex-shrink: 0;
+}
+
+.navbar-title {
+  font-size: 0.93rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+
+.navbar-subtitle {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  margin-left: 6px;
+}
+
+.navbar-sep {
+  flex: 1;
+}
+
+.navbar-version {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--accent);
+  background: var(--accent-muted);
+  padding: 2px 9px;
+  border-radius: 20px;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+
+/* ═══════════════════════════════════════════
+   APP BODY — sidebar + main flex container
+   ═══════════════════════════════════════════ */
+.app-body {
+  display: flex;
+  height: calc(100vh - var(--navbar-h));
+  overflow: hidden;
+}
+
+
+/* ═══════════════════════════════════════════
+   SIDEBAR (dark)
+   ═══════════════════════════════════════════ */
+.pinagmm-sidebar {
+  width: var(--sidebar-w);
+  min-width: var(--sidebar-w);
+  background: var(--sb-bg);
+  border-right: 1px solid var(--sb-border);
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 16px 14px 36px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Section headings */
+.sb-section-head {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.60rem;
+  font-weight: 700;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  color: var(--sb-text-muted);
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--sb-border);
+  margin-bottom: 12px;
+}
+
+.sb-divider {
+  border: none;
+  border-top: 1px solid var(--sb-border);
+  margin: 16px 0 14px;
+}
+
+/* Labels — support nested html.Sub / html.Sup children */
+.sb-label {
+  display: block;
+  font-size: 0.67rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  color: var(--sb-text);
+  margin-bottom: 5px;
+  margin-top: 10px;
+  line-height: 1.5;
+}
+
+.sb-label:first-child {
+  margin-top: 0;
+}
+
+/* Subscript / superscript inside labels */
+.sb-label sub,
+.sb-label sup {
+  font-size: 0.75em;
+  line-height: 0;
+  position: relative;
+  vertical-align: baseline;
+}
+
+.sb-label sub {
+  bottom: -0.18em;
+}
+
+.sb-label sup {
+  top: -0.35em;
+}
+
+
+/* Hint text */
+.sb-tip {
+  display: block;
+  font-size: 0.63rem;
+  color: var(--sb-text-muted);
+  margin-top: 4px;
+  line-height: 1.45;
+}
+
+/* ─── Sidebar: native select (dbc.Select) ────────────────────────── */
+.pinagmm-sidebar .form-select {
+  background-color: var(--sb-bg-2) !important;
+  border: 1px solid var(--sb-border) !important;
+  color: var(--sb-text) !important;
+  font-size: 0.77rem !important;
+  border-radius: var(--r-sm) !important;
+  padding: 5px 28px 5px 9px !important;
+  cursor: pointer;
+  transition: border-color 0.22s ease, box-shadow 0.22s ease;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important;
+  background-position: right 8px center !important;
+  background-size: 12px !important;
+}
+
+.pinagmm-sidebar .form-select:focus {
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.22) !important;
+  outline: none !important;
+}
+
+.pinagmm-sidebar .form-select option {
+  background: #1e293b;
+  color: var(--sb-text);
+}
+
+/* ─── Sidebar: number & text inputs ─────────────────────────────── */
+.pinagmm-sidebar .form-control {
+  background-color: var(--sb-bg-2) !important;
+  border: 1px solid var(--sb-border) !important;
+  color: var(--sb-text) !important;
+  font-size: 0.77rem !important;
+  border-radius: var(--r-sm) !important;
+  padding: 5px 9px !important;
+  transition: border-color 0.22s ease, box-shadow 0.22s ease;
+}
+
+.pinagmm-sidebar .form-control::placeholder {
+  color: var(--sb-text-muted) !important;
+}
+
+.pinagmm-sidebar .form-control:focus {
+  background-color: var(--sb-bg-2) !important;
+  border-color: var(--accent) !important;
+  color: var(--sb-text) !important;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.22) !important;
+  outline: none !important;
+}
+
+/* ─── Sidebar: Accordion (collapsible sections) ──────────────────── */
+.ops-accordion.accordion {
+  --bs-accordion-bg: transparent !important;
+}
+
+.ops-accordion .accordion-item {
+  background: transparent !important;
+  border: none !important;
+  border-top: 1px solid var(--sb-border) !important;
+  border-radius: 0 !important;
+}
+
+.ops-accordion .accordion-item:last-child {
+  border-bottom: 1px solid var(--sb-border) !important;
+}
+
+.ops-accordion .accordion-button {
+  background: transparent !important;
+  color: var(--sb-text) !important;
+  font-size: 0.74rem !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.02em !important;
+  padding: 9px 2px !important;
+  box-shadow: none !important;
+  border: none !important;
+}
+
+.ops-accordion .accordion-button:not(.collapsed) {
+  color: var(--accent-on-dark) !important;
+  background: transparent !important;
+}
+
+.ops-accordion .accordion-button:hover {
+  color: #e2e8f0 !important;
+}
+
+.ops-accordion .accordion-button::after {
+  filter: brightness(0) invert(0.55) !important;
+  width: 14px !important;
+  height: 14px !important;
+  background-size: 14px !important;
+  flex-shrink: 0 !important;
+}
+
+.ops-accordion .accordion-button:not(.collapsed)::after {
+  filter: brightness(0) saturate(100%) invert(71%) sepia(50%) saturate(500%) hue-rotate(200deg) !important;
+}
+
+.ops-accordion .accordion-body {
+  background: transparent !important;
+  padding: 4px 2px 14px !important;
+}
+
+/* ─── Sidebar: Radio items (dark theme) ─────────────────────────────────── */
+.pinagmm-sidebar .sb-radio .form-check-label {
+  color: var(--sb-text) !important;
+  font-size: 0.74rem !important;
+  cursor: pointer;
+  user-select: none;
+}
+
+.pinagmm-sidebar .sb-radio .form-check-input {
+  background-color: var(--sb-bg-2) !important;
+  border-color: rgba(148, 163, 184, 0.35) !important;
+  cursor: pointer;
+}
+
+.pinagmm-sidebar .sb-radio .form-check-input:checked {
+  background-color: var(--accent) !important;
+  border-color: var(--accent) !important;
+}
+
+.pinagmm-sidebar .sb-radio .form-check-input:focus {
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.22) !important;
+}
+
+.sb-radio {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-bottom: 4px;
+}
+
+/* ─── Sidebar: Primary (Predict) button ─────────────────────────── */
+.btn-predict,
+.btn-predict:hover,
+.btn-predict:focus,
+.btn-predict:active {
+  display: block !important;
+  width: 100% !important;
+  background: var(--accent) !important;
+  border: none !important;
+  color: #fff !important;
+  font-size: 0.72rem !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.03em !important;
+  padding: 7px 12px !important;
+  border-radius: var(--r-sm) !important;
+  margin-top: 8px !important;
+  transition: background-color 0.2s ease, transform 0.12s ease !important;
+  cursor: pointer !important;
+}
+
+.btn-predict:hover {
+  background: var(--accent-hover) !important;
+}
+
+.btn-predict:active {
+  transform: scale(0.98) !important;
+}
+
+/* ─── Sidebar: Simulate (emerald) button ────────────────────────── */
+.btn-simulate,
+.btn-simulate:hover,
+.btn-simulate:focus,
+.btn-simulate:active {
+  display: block !important;
+  width: 100% !important;
+  background: var(--accent2) !important;
+  border: none !important;
+  color: #fff !important;
+  font-size: 0.72rem !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.03em !important;
+  padding: 7px 12px !important;
+  border-radius: var(--r-sm) !important;
+  margin-top: 6px !important;
+  transition: background-color 0.2s ease, transform 0.12s ease !important;
+  cursor: pointer !important;
+}
+
+.btn-simulate:hover {
+  background: var(--accent2-hover) !important;
+}
+
+.btn-simulate:active {
+  transform: scale(0.98) !important;
+}
+
+/* ─── Sidebar: Clear / Reset button ─────────────────────────────── */
+.btn-clear,
+.btn-clear:hover,
+.btn-clear:focus,
+.btn-clear:active {
+  display: block !important;
+  width: 100% !important;
+  background: transparent !important;
+  border: 1px solid rgba(220, 38, 38, 0.40) !important;
+  color: #fca5a5 !important;
+  font-size: 0.70rem !important;
+  font-weight: 600 !important;
+  padding: 5px 12px !important;
+  border-radius: var(--r-sm) !important;
+  margin-top: 6px !important;
+  transition: background-color 0.2s ease, border-color 0.2s ease !important;
+  cursor: pointer !important;
+}
+
+.btn-clear:hover {
+  background: rgba(220, 38, 38, 0.10) !important;
+  border-color: rgba(220, 38, 38, 0.70) !important;
+}
+
+/* ─── Navbar status ─────────────────────────────────────────────────────── */
+.navbar-status {
+  font-size: 0.70rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+/* ─── Status pill (inside navbar) ─────────────────────────────────────── */
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.68rem;
+  font-weight: 600;
+  padding: 2px 10px;
+  border-radius: 20px;
+  background: #f1f5f9;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  letter-spacing: 0.02em;
+  margin: 0;
+  line-height: 1.4;
+  text-align: center;
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
+
+.status-pill.busy {
+  color: #d97706;
+  border-color: rgba(217, 119, 6, 0.3);
+  background: #fffbeb;
+}
+
+.status-pill.done {
+  color: var(--success);
+  border-color: rgba(5, 150, 105, 0.3);
+  background: #f0fdf4;
+}
+
+.status-pill.error {
+  color: var(--error);
+  border-color: rgba(220, 38, 38, 0.3);
+  background: var(--error-bg);
+}
+
+
+/* ─── Sidebar: 2-col grid for paired inputs ─────────────────────── */
+.sb-2col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+/* ─── Conditional row card ────────────────────────────────────────── */
+.cond-row-card {
+  border: 1px dashed rgba(255, 255, 255, 0.14) !important;
+  border-radius: var(--r-sm) !important;
+  background: rgba(0, 0, 0, 0.12) !important;
+  padding: 8px !important;
+  margin-bottom: 6px !important;
+}
+
+.btn-add-cond,
+.btn-add-cond:hover,
+.btn-add-cond:focus {
+  display: block !important;
+  width: 100% !important;
+  background: transparent !important;
+  border: 1px dashed rgba(165, 180, 252, 0.35) !important;
+  color: var(--accent-on-dark) !important;
+  font-size: 0.70rem !important;
+  font-weight: 600 !important;
+  padding: 5px 10px !important;
+  border-radius: var(--r-sm) !important;
+  margin-top: 6px !important;
+  cursor: pointer !important;
+  transition: border-color 0.2s, background 0.2s !important;
+}
+
+.btn-add-cond:hover {
+  border-color: var(--accent-on-dark) !important;
+  background: rgba(79, 70, 229, 0.07) !important;
+}
+
+/* ═══════════════════════════════════════════
+   MAIN CONTENT AREA
+   ═══════════════════════════════════════════ */
+.main-content {
+  flex: 1;
+  min-width: 0;
+  overflow-y: auto;
+  background: var(--bg-page);
+  padding: 16px 20px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* ─── Error banner ──────────────────────────────────────────────── */
+.error-banner-block {
+  padding: 8px 16px;
+  background: #fef9c3;
+  color: #713f12;
+  border-bottom: 1px solid #fde68a;
+  font-size: 0.75rem;
+  border-radius: var(--r-sm);
+}
+
+
+/* ═══════════════════════════════════════════
+   TABS  (underline style, not boxes)
+   ═══════════════════════════════════════════ */
+.nav-tabs {
+  border-bottom: 2px solid var(--border) !important;
+  gap: 0 !important;
+}
+
+.nav-tabs .nav-item {
+  margin-bottom: -2px;
+}
+
+.nav-tabs .nav-link {
+  font-size: 0.80rem !important;
+  font-weight: 500 !important;
+  color: var(--text-secondary) !important;
+  border: none !important;
+  border-bottom: 2px solid transparent !important;
+  padding: 8px 18px !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  transition: color 0.18s ease, border-color 0.18s ease !important;
+}
+
+.nav-tabs .nav-link:hover {
+  color: var(--text-primary) !important;
+  border-bottom-color: var(--border-strong) !important;
+}
+
+.nav-tabs .nav-link.active {
+  color: var(--accent) !important;
+  border-bottom-color: var(--accent) !important;
+  font-weight: 600 !important;
+  background: transparent !important;
+}
+
+.tab-content,
+.tab-pane,
+.tab-pane.active {
+  width: 100% !important;
+}
+
+
+/* ═══════════════════════════════════════════
+   CARDS  (chart containers, info cards)
+   ═══════════════════════════════════════════ */
+.pinagmm-card {
+  width: 100% !important;
+  box-sizing: border-box;
+  background: var(--bg-surface);
+  border: 1px solid var(--border) !important;
+  border-radius: var(--r-md) !important;
+  box-shadow: var(--shadow-card);
+  padding: 16px 20px;
+  overflow: hidden; /* prevent table from bleeding out of card into page */
+}
+
+/* Ensure Plotly graphs and containers take 100% width */
+.js-plotly-plot,
+.plot-container,
+.svg-container {
+  width: 100% !important;
+}
+
+/* ─── Plotly charts: 100% width (does not affect DataTable) ─────── */
+
+
+
+/* ─── Graph card header ──────────────────────────────────────────── */
+.graph-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.graph-card-title {
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  letter-spacing: 0.02em;
+}
+
+
+/* ═══════════════════════════════════════════
+   DOWNLOAD BUTTON  (pill / outlined)
+   ═══════════════════════════════════════════ */
+.btn-dl,
+.btn-dl:hover,
+.btn-dl:focus,
+.btn-dl:active {
+  background: transparent !important;
+  border: 1px solid var(--border-strong) !important;
+  color: var(--text-secondary) !important;
+  font-size: 0.68rem !important;
+  font-weight: 600 !important;
+  padding: 3px 11px !important;
+  border-radius: 20px !important;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease !important;
+  letter-spacing: 0.02em !important;
+  white-space: nowrap !important;
+}
+
+.btn-dl:hover {
+  background: var(--accent-light) !important;
+  color: var(--accent) !important;
+  border-color: var(--accent) !important;
+}
+
+.dl-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding-top: 10px;
+}
+
+
+/* ═══════════════════════════════════════════
+   TIME SERIES — Channel Switcher (pill radios)
+   ═══════════════════════════════════════════ */
+.ts-switcher {
+  display: flex !important;
+  gap: 6px !important;
+  flex-wrap: wrap;
+  padding: 10px 0 4px !important;
+}
+
+.ts-switcher .form-check-inline {
+  margin: 0 !important;
+}
+
+.ts-switcher .form-check-input {
+  display: none !important;
+}
+
+.ts-switcher .form-check-label {
+  display: inline-block;
+  padding: 5px 15px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-strong);
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+  user-select: none;
+}
+
+.ts-switcher .form-check-label:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.ts-switcher .form-check-input:checked+.form-check-label {
+  background: var(--accent);
+  color: #ffffff;
+  border-color: var(--accent);
+  font-weight: 600;
+}
+
+
+/* ═══════════════════════════════════════════
+   SPECTRA  — 2×2 responsive grid
+   ═══════════════════════════════════════════ */
+.spectra-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+@media (max-width: 960px) {
+  .spectra-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+/* ═══════════════════════════════════════════
+   PREDICTION TAB — info card, IM table
+   ═══════════════════════════════════════════ */
+.pred-info-card {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: var(--r-sm);
+  padding: 10px 14px;
+  font-size: 0.76rem;
+  color: #1e40af;
+  margin-bottom: 14px;
+  line-height: 1.6;
+}
+
+.hint-card {
+  background: var(--bg-surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 48px 24px;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.88rem;
+  line-height: 1.7;
+}
+
+/* Component colour badges */
+.comp-badge {
+  display: inline-block;
+  font-size: 0.60rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 1px 8px;
+  border-radius: 10px;
+  margin-right: 5px;
+}
+
+.comp-badge.major {
+  background: rgba(79, 70, 229, 0.12);
+  color: var(--col-major);
+}
+
+.comp-badge.inter {
+  background: rgba(8, 145, 178, 0.12);
+  color: var(--col-inter);
+}
+
+.comp-badge.vert {
+  background: rgba(5, 150, 105, 0.12);
+  color: var(--col-vert);
+}
+
+
+/* ═══════════════════════════════════════════
+   IM DATA TABLE
+   ═══════════════════════════════════════════ */
+
+.dash-header {
+  background: var(--bg-surface-2) !important;
+  border-bottom: 2px solid var(--border) !important;
+}
+
+.dash-header .column-header-name {
+  font-size: 0.68rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.05em !important;
+  color: var(--text-secondary) !important;
+}
+
+.dash-cell {
+  border-bottom: 1px solid var(--bg-surface-2) !important;
+}
+
+.dash-cell-value {
+  font-size: 0.80rem !important;
+  font-family: var(--font-mono) !important;
+}
+
+/* ---------------------------------------------------
+   IM table – the placeholder div IS the scroll container.
+   It has a bounded width and shows its own scrollbars. */
+#table-pred-ims-container {
+  width: 100%;             /* fill the card */
+  overflow-x: auto;        /* horizontal scrollbar on this div */
+  overflow-y: auto;        /* vertical scrollbar on this div */
+  max-height: 420px;       /* fixed height – same scale as other charts */
+  max-width: 840px;        /* prevent table from growing too wide on large screens */
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Dash injects extra wrappers – let them expand to natural table width */
+#table-pred-ims-container .dash-table-container,
+#table-pred-ims-container .dash-spreadsheet-container,
+#table-pred-ims-container .dash-spreadsheet-inner {
+  width: max-content;  /* grow to actual table width so parent can scroll */
+  overflow: visible;   /* do NOT clip – the parent div clips */
+}
+
+/* ═══════════════════════════════════════════
+   ANIMATIONS
+   ═══════════════════════════════════════════ */
+@keyframes fadeSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.pinagmm-card {
+  animation: fadeSlideIn 0.18s ease-out;
+}
+
+/* Suppress Bootstrap card defaults */
+.pinagmm-card.card {
+  border: none;
+}
+
+/* Spinner overlay on busy */
+.busy-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.18);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}

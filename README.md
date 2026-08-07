@@ -1,157 +1,91 @@
 <div align="center">
-  <img src="https://raw.githubusercontent.com/Sajad-Hussaini/pinagmm/main/pinagmm/gui/assets/logo.png" alt="PINAGMM Logo" width="300"/>
+  <img src="https://raw.githubusercontent.com/Sajad-Hussaini/pinagmm/main/src/pinagmm/gui/assets/logo.png" alt="PINAGMM Logo" width="300"/>
   <br>
   <h1>PINAGMM: Physics-Informed Neural Additive Ground Motion Model</h1>
 
   <p>
-    <a href="https://www.python.org/downloads/"><img src="https://img.shields.io/badge/python-3.8+-blue.svg" alt="Python"></a>
+    <a href="https://www.python.org/downloads/"><img src="https://img.shields.io/badge/python-3.12+-blue.svg" alt="Python"></a>
     <a href="https://opensource.org/licenses/GPL-3.0"><img src="https://img.shields.io/badge/license-GPLv3-blue.svg" alt="License"></a>
     <a href="https://pinagmm.onrender.com"><img src="https://img.shields.io/badge/Live-Web_App-success?style=flat&logo=render" alt="Live Web App"></a>
     <a href="https://doi.org/10.5281/zenodo.20746843"><img src="https://img.shields.io/badge/DOI-10.5281%2Fzenodo.20746843-blue.svg" alt="DOI"></a>
   </p>
 </div>
 
-**PINAGMM** is a unified multivariate generative framework that bridges the prediction of discrete intensity measures (IMs) with the synthesis of hazard-compatible, three-component stochastic ground motion time-series. 
+**PINAGMM** is a unified generative framework designed for performance-based earthquake engineering. It bridges statistical machine-learning prediction of discrete intensity measures (IMs) with the synthesis of hazard-compatible, three-component stochastic ground motion time-series.
 
-Developed for performance-based earthquake engineering, this framework uses a Physics-Informed Neural Additive Model (NAM) coupled with [Multivariate Mixed-Effects Regression (MMER)](https://github.com/Sajad-Hussaini/mmer). It enables the direct conditional simulation of physically coherent synthetic ground motions using [a Stochastic Simulation Engine (SGSIM)](https://github.com/Sajad-Hussaini/sgsim) for prescribed hazard scenarios, completely bypassing the need for artificial time-domain spectral matching.
+Powered by a Physics-Informed Neural Additive Model (NAM) coupled with [Multivariate Mixed-Effects Regression (MMER)](https://github.com/Sajad-Hussaini/mmer) and a [Stochastic Simulation Engine (SGSIM)](https://github.com/Sajad-Hussaini/sgsim), PINAGMM enables direct conditional simulation of physically coherent ground motions for prescribed earthquake hazard scenarios, bypassing the need for artificial time-domain spectral matching.
+
 
 ## Table of Contents
 - [Installation](#installation)
-- [Overview: Predict vs. Simulate](#overview-predict-vs-simulate)
-- [Graphical User Interface (GUI)](#graphical-user-interface-gui)
-- [Python API (For Power Users)](#python-api-for-power-users)
-  - [1. Median Predictions](#1-median-predictions-predict)
-  - [2. Stochastic Simulation (Unconditional & Conditional)](#2-stochastic-simulation)
+- [Desktop Application (GUI)](#desktop-application-gui)
+- [Web Demo App](#web-demo-app)
+- [Python API & Custom Workflows](#python-api--custom-workflows)
 - [Contact & Support](#contact--support)
 - [License](#license)
 - [References](#references)
 
 ## Installation
 
-We recommend installing the CPU-only version of PyTorch first to save disk space, followed by this package.
+Install **PINAGMM** directly from GitHub with a single command:
 
 ```bash
-# 1. Clone the repository
-git clone https://github.com/Sajad-Hussaini/PINAGMM.git
-cd PINAGMM
-
-# 2. Install CPU-only PyTorch
-pip install torch --index-url https://download.pytorch.org/whl/cpu
-
-# 3. Install PINAGMM and dependencies (sgsim, mmer, etc.)
-pip install .
+pip install git+https://github.com/Sajad-Hussaini/pinagmm.git
 ```
 
+<details>
+<summary><b>Updating to the Latest Version</b></summary>
+To update to the latest version at any time, run:
 
-## Overview: Predict vs. Simulate
+```bash
+pip install --upgrade git+https://github.com/Sajad-Hussaini/pinagmm.git
+```
+</details>
 
-PINAGMM separates the statistical machine-learning predictions from the end-to-end stochastic ground motion simulation:
+## Desktop Application (GUI)
 
-- **`predict()` (The Machine Learning layer):** Purely runs the neural network to predict the 69 output variables (Intensity Measures and stochastic simulation parameters) for a given earthquake scenario. No waveforms are generated here.
-- **`simulate()` (The End-to-End Generative layer):** A comprehensive wrapper that takes the ML predictions, mathematically applies covariance sampling and conditional target matching (if requested), and automatically feeds the parameters into the stochastic engine (`sgsim`) to generate actual 3-component ground motions.
+The simplest way to use **PINAGMM** on your local machine is through its interactive Graphical User Interface (GUI). 
 
+Once installed, launch the application by running a single command in your terminal:
 
-## Graphical User Interface (GUI)
-
-For users who prefer a visual, no-code environment, we host a live version of the PINAGMM interactive dashboard. You can generate and download synthetic ground motions directly in your browser without installing any code!
-
-🌐 **[Launch the Live Web App](https://pinagmm.onrender.com)**
-
-> ⚠️ **Live Demo Limitations:** The web app above is hosted on a free cloud server with very limited memory. It is intended strictly as a **lightweight demo** to explore the interface and test small predictions (a few simulations). Attempting to run large batches of stochastic simulations online will not work and face reloading server. For practical, full-scale ground motion generation, please install and run the GUI locally!
-
-The GUI allows you to:
-- Seamlessly input scenario parameters (Mw, Ztor, Rrup, Vs30, Fm).
-- Toggle conditional hazard targets (e.g., forcing Sa at 1.0s to equal 0.9g).
-- Instantly visualize predicted median response spectra.
-- Plot and explore 3-component time-series realizations and their Fourier Amplitude Spectra using interactive Plotly charts.
-- Export all generated data and spectra directly to neatly formatted CSV files with a single click.
-
-### Run the GUI Locally
-
-If you prefer to run the GUI securely on your own machine, first follow the [Installation](#installation) instructions. Then, ensure your virtual environment is active and run the following command in your terminal:
 ```bash
 pinagmm
 ```
-This will automatically launch the dashboard (usually at `http://localhost:8080`) in your local web browser.
 
-## Python API (For Power Users)
+This automatically opens the PINAGMM interface in your web browser.
 
-### 1. Median Predictions (`predict`)
+### Key Capabilities & Deliverables
+- **Earthquake Scenario Inputs:** Easily define scenario parameters including moment magnitude ($M_w$), rupture distance ($R_{rup}$), top of rupture depth ($Z_{tor}$), site condition ($V_{s30}$), and fault mechanism ($F_m$).
+- **Hazard-Targeting (Conditional Simulation):** Prescribe specific target hazard levels (e.g., conditioning Spectral Acceleration at $T=1.0\text{ s}$ to a target physical value).
+- **GMM Prediction and Response Spectra Visualization:** Instantly generate and display output of GMM predictions and corresponding response spectra across Major, Intermediate, and Vertical axes.
+- **Stochastic Time-Series Simulation:** Synthesize full 3-component ground motion time-series (acceleration, velocity, displacement) and their Fourier Amplitude and Response Spectra.
+- **One-Click Export:** Export all predicted parameters, simulated ground motion records, and fourier amplitude and response spectra directly to CSV files.
 
-The `PINAGMM` class generates the median physical scaling for both Intensity Measures (PGA, PGV, Sa) and the underlying parameters governing the stochastic simulation (Energy, Duration, Frequencies).
 
-```python
-from pinagmm import PINAGMM
+## Web Demo App
 
-# Initialize the model
-model = PINAGMM()
+For users who want to explore the interface without installing the package, a hosted cloud preview is available:
 
-# Predict median parameters for a specific earthquake scenario
-predictions = model.predict(Mw=6.5, Ztor=1.0, Rrup=25.0, Vs30=560.0, Fm="0")
+🌐 **[Launch the Live Web Demo](https://pinagmm.onrender.com)**
 
-print(predictions[["PGA", "Sa(T=1)", "PGV"]])
-```
+> ⚠️ **Demo Note:** The web demo runs on a lightweight free cloud tier with limited resources. It is designed for quick interface exploration. For full-scale ground motion generation and batch stochastic simulations, please run the desktop application locally via `pinagmm`.
 
-> 💡 **Tip:** We highly recommend checking out the `example/run_me.py` file in this repository. It is a fully functional script that demonstrates how to generate predictions, simulate time-series, save them to CSV files, and use `matplotlib` to plot and save the results!
+## Python API & Custom Workflows
 
-### 2. Stochastic Simulation
+If you need to automate batch calculations, integrate PINAGMM into existing engineering scripts, or build custom simulation workflows, PINAGMM provides a simple Python API.
 
-The true power of this framework lies in the generative engine, which leverages the learned inter-parameter covariance matrix to generate realistic 3-component ground motion seamlessly.
+A fully functional reference script is provided in the repository:
+📄 **[`example/run_me.py`](example/run_me.py)**
 
-The model provides two completely independent layers of statistical generation natively through the `simulate()` method:
-1. `n_samples`: The number of macroscopic parameter sets to sample from the underlying neural GMM's covariance matrix.
-2. `n_simulations`: The number of discrete time-series realizations to generate for *each* parameter set using the stochastic simulation engine.
+The example script demonstrates:
+1. **Median Predictions:** Calculating intensity measures and stochastic parameters for a given scenario and exporting them to CSV.
+2. **Unconditional Stochastic Simulation:** Generating multiple 3-component time-series realizations using the median GMM prediction.
+3. **Conditional Hazard Simulation:** Prescribing target hazard conditions and synthesizing target-compatible ground motions.
+4. **Data Export & Plotting:** Saving generated time-series waveforms and response spectra to CSV files and generating publication-ready plots.
 
-#### 1. Unconditional Simulation (Median vs Sampled)
-Generate physically consistent ground motions based purely on the macroscopic earthquake scenario. 
-
-```python
-from pinagmm import PINAGMM
-
-# Initialize the model
-gmm = PINAGMM()
-
-# Example A: 5 Stochastic Realizations using the exact Median GMM prediction
-ts_m_med, ts_i_med, ts_v_med = gmm.simulate(
-    Mw=6.5,
-    Ztor=1.0,
-    Rrup=25.0,
-    Vs30=560.0,
-    Fm="0",
-    n_samples=0,  # 0 = Use the median GMM prediction
-    n_simulations=5,  # 5 time-series realizations
-)
-
-# Example B: 10 Parameter Samples from the GMM, 1 Stochastic Realization each
-ts_m_list, ts_i_list, ts_v_list = gmm.simulate(
-    Mw=6.5,
-    Ztor=1.0,
-    Rrup=25.0,
-    Vs30=560.0,
-    Fm="0",
-    n_samples=10,  # Sample 10 unique parameter conditions from the Neural NAM
-    n_simulations=1,  # 1 time-series realization per parameter set
-)
-```
-
-#### 2. Conditional Simulation (Hazard-Targeting)
-
-Mathematically condition the generative model to match a specific hazard target (e.g., forcing Spectral Acceleration at 1.0s to a specific physical value like 0.9g). The framework automatically adjusts all other correlated IMs and physical simulation parameters across all three principal axes to physically justify the target.  
-
-```python
-# Condition the target IM (Major SA at 1s) to 0.9 g
-target_conditions = {"M_Sa_1": 0.9}
-
-ts_m_cond, ts_i_cond, ts_v_cond = gmm.simulate(
-    Mw=6.5,
-    Ztor=1.0,
-    Rrup=25.0,
-    Vs30=560.0,
-    Fm="0",
-    conditions=target_conditions,
-    n_samples=10,  # 10 conditioned samples
-    n_simulations=1,
-)
+You can run the script directly from your terminal:
+```bash
+python example/run_me.py
 ```
 
 ## Contact & Support
@@ -180,4 +114,3 @@ If you use PINAGMM in your research, please cite the following references:
 **[2] PINAGMM Software Package**  
 *Physics-Informed Neural Additive Ground Motion Model*  
 *DOI: [https://doi.org/10.5281/zenodo.20746843](https://doi.org/10.5281/zenodo.20746843)*
-
